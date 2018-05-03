@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
+    <link rel="stylesheet" href="css/vis-network.min.css"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/stylesheet.css">
+    <link rel="stylesheet" href="css/json.css">
+    <link rel="stylesheet" href="css/jquery.enhsplitter.css">
+    <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/vis.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/sh-graph.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/jquery.enhsplitter.js"></script>
+    <script type="text/javascript" src="js/renderjson.js"></script>
+    <style>
+        #mynetwork {
+            border: 1px solid darkgray;
+            background-color: #d3d3d3;
+        }
+
+        #netexplorer {
+          height: 99%;
+        }
+
+        .toast--success__message {
+          color: lightgreen;
+        }
+
+        .toast--failure__message {
+          color: red;
+        }
+
+        ons-input .text-input__container input {
+          width: 100%;
+          display: inline-block;
+        }
+    </style>
+  </head>
+
+  <body>
+    <ons-page>
+      <ons-toolbar>
+        <div class="left">
+          <ons-toolbar-button onclick="fn.open()">
+            <ons-icon icon="md-menu"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <div class="center" style="color: #4286f4;">
+          Sensors-Hub Node Network
+        </div>
+      </ons-toolbar>
+      <div id="root-container">
+        <div id="netexplorer"></div>
+        <div id="mynetwork"></div>
+      </div>
+      <script type="text/javascript">
+        renderjson.set_show_to_level(1);
+        $('#root-container').enhsplitter({position: '30%'});
+        shBuildSystemGraph();
+      </script>
+    </ons-page>
+  </body>
+  <template id="dialog.html">
+    <ons-alert-dialog id="my-dialog" modifier="rowfooter">
+      <div class="alert-dialog-title">Alert</div>
+      <div class="alert-dialog-content">
+       Are you sure?
+      </div>
+      <div class="alert-dialog-footer">
+        <ons-alert-dialog-button onclick="deleteDevice();hideDialog('my-dialog');">Ok</ons-alert-dialog-button>
+        <ons-alert-dialog-button onclick="hideDialog('my-dialog')">Cancel</ons-alert-dialog-button>
+      </div>
+    </ons-alert-dialog>
+  </template>
+</html>

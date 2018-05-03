@@ -1,0 +1,26 @@
+{
+  "devices" :
+  [
+      {
+        "name":"device0",
+        "description":"device0",
+        "metadataEncoding":"application/pdf",
+        "metadata":"http://dummy.org/schema.pdf",
+        "driverName":"driver 1"
+      },
+      {
+        "name":"device1",
+        "description":"device1",
+        "metadataEncoding":"application/pdf",
+        "metadata":"http://dummy.org/schema.pdf",
+        "driverName":"driver 1"
+      },
+      {
+        "name":"device2",
+        "description":"device2",
+        "metadataEncoding":"application/pdf",
+        "metadata":"http://dummy.org/schema.pdf",
+        "driverName":"driver 1"
+      }
+  ]
+}
