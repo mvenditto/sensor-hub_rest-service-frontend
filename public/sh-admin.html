@@ -59,10 +59,11 @@
       <script type="text/javascript">
         renderjson.set_show_to_level(1);
         $('#root-container').enhsplitter({position: '30%'});
-        shBuildSystemGraph();
+        $(document).ready(r => shBuildSystemGraph())
       </script>
     </ons-page>
   </body>
+
   <template id="dialog.html">
     <ons-alert-dialog id="my-dialog" modifier="rowfooter">
       <div class="alert-dialog-title">Alert</div>
@@ -75,4 +76,13 @@
       </div>
     </ons-alert-dialog>
   </template>
+
+  <ons-modal id="loading-modal" direction="up">
+    <div style="text-align: center">
+      <p>
+        <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+      </p>
+    </div>
+  </ons-modal>
+
 </html>

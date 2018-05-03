@@ -20,6 +20,8 @@ function shGet(resourceName) {return $.get(SH_REST_SERVER + resourceName) }
 
 function shBuildSystemGraph() {
 
+  showLoadingModal()
+
   var ids = 2
   var nodes = new Set()
   var edges = new Set()
@@ -115,6 +117,7 @@ function shBuildSystemGraph() {
     shInitGraphEvents(network);
     $("#mynetwork canvas").bind("contextmenu", (e) => false);
     $(document).ready(d => network.redraw())
+    hideLoadingModal()
   })
 }
 
@@ -274,8 +277,10 @@ function createDeviceFromDriver() {
         driverName: selectedNode.data.name,
     }
     console.log(JSON.stringify(deviceMetadata))
+    showLoadingModal();
     $.post("http://localhost:8081/devices/", JSON.stringify(deviceMetadata), (data) => {
       console.log(data)
+      hideLoadingModal();
       if (data != undefined) {
         console.log("refresh");
         ons.notification.toast('successfully created: ' + JSON.stringify(data), {timeout: 5000, animation: 'fall', modifier:'success' })

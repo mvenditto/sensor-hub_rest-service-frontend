@@ -12,6 +12,13 @@ function obsDatastream() {
   }
 }
 
+function showLoadingModal() {
+  document.getElementById("loading-modal").show()
+}
+function hideLoadingModal() {
+  document.getElementById("loading-modal").hide()
+}
+
 function jsonToOnsCard(j, title="") {
 
   var cardTitle = "Object?"
