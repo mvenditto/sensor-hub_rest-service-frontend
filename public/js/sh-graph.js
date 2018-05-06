@@ -7,6 +7,7 @@ let DEVICES = 'devices'
 let DATASTREAMS = 'dataStreams'
 let SERVICES = 'services'
 let PROPERTIES = 'observedProperties'
+let TASKS = DEVICES + '/tasks'
 
 let HUBS_GROUP = 'hubs'
 let THINGS_GROUP = 'things'
@@ -15,6 +16,7 @@ let DRIVERS_GROUP = 'drivers'
 let PROPERTIES_GROUP = 'properties'
 let SERVICES_GROUP = 'services'
 let DATASTREAMS_GROUP = 'datastreams'
+let TASKS_GROUP = 'tasks'
 
 function shGet(resourceName) {return $.get(SH_REST_SERVER + resourceName) }
 
@@ -68,7 +70,8 @@ function shBuildSystemGraph() {
     shGet(DRIVERS),
     shGet(DEVICES),
     shGet(PROPERTIES),
-    shGet(DATASTREAMS)]
+    shGet(DATASTREAMS),
+    shGet(TASKS)]
   ).then(results => {
 
     let services = JSON.parse(results[0])
@@ -76,6 +79,7 @@ function shBuildSystemGraph() {
     let devices = JSON.parse(results[2])
     let properties = JSON.parse(results[3])
     let dataStreams = JSON.parse(results[4])
+    let tasks = JSON.parse(results[5])
 
     services.forEach(s => {
       nodes.add({id: ids, label:s.name, group:SERVICES_GROUP, data:s, level:0})
@@ -94,6 +98,16 @@ function shBuildSystemGraph() {
       edges.add({from:root.id, to:ids})
       edges.add({from: ids, to: findDriverId(dev.driverName), dashes: true})
       ids = ids + 1
+      let devId = ids - 1
+      let devTasks = tasks.find(t => t.deviceId == dev.id)
+      if (devTasks != undefined) {
+        devTasks.supportedTasks.forEach(t => {
+          t.deviceId = dev.id
+          nodes.add({id: ids, label:t.title, group:TASKS_GROUP, data:t, level:5})
+          edges.add({from:devId, to:ids})
+          ids = ids + 1
+        })
+      }
     })
 
     properties.forEach(prop => {
@@ -144,12 +158,20 @@ function shInitGraphEvents(network) {
         let n = nodes._data[node]
         c.appendChild(jsonToOnsCard(n.data, n.group));
 
-        if (n.group === "drivers") {
+        if (n.group === DRIVERS_GROUP) {
           c.appendChild(deviceCreationForm);
         }
 
-        if (n.group === "datastreams") {
+        if (n.group === DATASTREAMS_GROUP) {
           c.appendChild(datastreamWS);
+        }
+
+        if(n.group == TASKS_GROUP){
+          c.appendChild(taskDebug)
+          let task = node_interactions["selected"].data
+          let schema = {}
+          task.required.forEach(field => schema[field] = task.properties[field].type)
+          $("#task-msg-area").val(JSON.stringify(schema, null, 4))
         }
 
       }
@@ -207,6 +229,10 @@ var options = {
                 size: 50,
                 color: '#484749'
             }
+        },
+        tasks: {
+            shape: 'image',
+            image: 'imgs/task.svg'
         },
         properties: {
             shape: 'icon',

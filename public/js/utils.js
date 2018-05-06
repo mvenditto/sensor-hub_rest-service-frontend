@@ -12,6 +12,30 @@ function obsDatastream() {
   }
 }
 
+function sendTask() {
+  let ds = node_interactions["selected"]
+  if (ds != undefined && ds.group == TASKS_GROUP) {
+    let taskName = ds.data.title
+    let deviceId = ds.data.deviceId
+    let message = $("#task-msg-area")[0].value
+
+    $.ajax({
+      url: "http://localhost:8081/devices/" + deviceId + "/tasks/" + taskName,
+      type: 'PUT',
+      contentType: "application/json",
+      data: message,
+      success: function(data) {
+        ons.notification.toast(taskName + ' result: ' + JSON.stringify(data),
+          {timeout: 5000, animation: 'fall', modifier:'success' })
+      },
+      failure: function(data) {
+        ons.notification.toast(taskName + 'failed : ' + JSON.stringify(data),
+          {timeout: 5000, animation: 'fall', modifier:'failure' })
+      }
+    });
+  }
+}
+
 function showLoadingModal() {
   document.getElementById("loading-modal").show()
 }
@@ -40,6 +64,9 @@ function jsonToOnsCard(j, title="") {
       break;
     case "units":
       cardTitle = "UnitOfMeasurement"
+      break
+    case "tasks":
+      cardTitle = "Task"
       break
     default:
   }
@@ -98,5 +125,21 @@ deviceCreationForm.innerHTML = `<div class="title" style="color: #4286f4; border
 
         <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
       </div>
+    </div>
+  </ons-card>`
+
+let taskDebug = document.createElement("ons-card")
+taskDebug.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
+      Execute Task
+    </div>
+    <div class="content">
+      <ons-row>
+        <ons-col width="30%">
+          <ons-button onclick="sendTask();">Send</ons-button>
+        </ons-col>
+        <ons-col width="70%">
+          <textarea id ="task-msg-area" class="textarea" rows="5" style="width:100%;"></textarea>
+        </ons-col>
+      </ons-row>
     </div>
   </ons-card>`
