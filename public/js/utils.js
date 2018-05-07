@@ -12,6 +12,25 @@ function obsDatastream() {
   }
 }
 
+function pollTaskResult(url, timeout){
+    $.get(url, function(data) {
+        if (data != undefined && url != undefined) {
+          console.log("data 1 ", data)
+          let json = JSON.parse(data)
+          console.log("data 2 " + url + " " + json)
+          if (json.status == "ready") {
+            console.log("task", json.result)
+            ons.notification.toast("task: " + url + ' complete with result: ' + JSON.stringify(json.result),
+              {timeout: 5000, animation: 'fall', modifier:'success' })
+          } else {
+            setTimeout(pollTaskResult(url, timeout), timeout);
+          }
+        } else {
+          setTimeout(pollTaskResult(url, timeout), timeout);
+        }
+    });
+}
+
 function sendTask() {
   let ds = node_interactions["selected"]
   if (ds != undefined && ds.group == TASKS_GROUP) {
@@ -24,13 +43,17 @@ function sendTask() {
       type: 'PUT',
       contentType: "application/json",
       data: message,
-      success: function(data) {
-        ons.notification.toast(taskName + ' result: ' + JSON.stringify(data),
-          {timeout: 5000, animation: 'fall', modifier:'success' })
+      success: function(data, status, request) {
+        let taskUrl = request.getResponseHeader("Location")
+        $("#task-result")[0].setAttribute("href", taskUrl)
+        $("#task-result").text(taskUrl)
+        ons.notification.toast(taskName + ' crated @: ' + taskUrl,
+          {timeout: 3000, animation: 'fall', modifier:'success' })
+        pollTaskResult(taskUrl, 5000)
       },
-      failure: function(data) {
-        ons.notification.toast(taskName + 'failed : ' + JSON.stringify(data),
-          {timeout: 5000, animation: 'fall', modifier:'failure' })
+      failure: function(data, status, error) {
+          ons.notification.toast(error,
+            {timeout: 3000, animation: 'fall', modifier:'failure' })
       }
     });
   }
@@ -140,6 +163,9 @@ taskDebug.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 
         <ons-col width="70%">
           <textarea id ="task-msg-area" class="textarea" rows="5" style="width:100%;"></textarea>
         </ons-col>
+      </ons-row>
+      <ons-row style="margin-top: 4%;">
+        <ons-col><a style="font-size:1.2em;" id ="task-result"></a></ons-col>
       </ons-row>
     </div>
   </ons-card>`
