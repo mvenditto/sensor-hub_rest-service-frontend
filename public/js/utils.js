@@ -1,3 +1,12 @@
+/*let auditWs = new WebSocket("ws://localhost:8081/audit");
+auditWs.onmessage = function(event) {
+  let json = JSON.parse(event.data)
+  if (json != undefined) {
+    console.log(json)
+  }
+}*/
+
+
 function obsDatastream() {
   let ds = node_interactions["selected"]
   if (ds != undefined && ds.group == DATASTREAMS_GROUP) {
@@ -140,12 +149,12 @@ deviceCreationForm.innerHTML = `<div class="title" style="color: #4286f4; border
     </div>
     <div class="content">
       <div style="text-align: center; margin-top: 30px;">
-
         <p><ons-input id="devName" modifier="underbar" placeholder="name" float></ons-input></p>
         <p><ons-input id="devDesc" modifier="underbar" placeholder="Brief description" float></ons-input></p>
         <p><ons-input id="devMetadataEncoding" modifier="underbar" placeholder="application/pdf" float></ons-input></p>
         <p><ons-input id="devMetadataURI" modifier="underbar" placeholder="http://example.org/schema.pdf" float></ons-input></p>
-
+        <p style="color: gray;">configuration [optional]:</p>
+        <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%;"></textarea></p>
         <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
       </div>
     </div>

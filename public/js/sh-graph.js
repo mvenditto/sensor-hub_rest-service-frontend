@@ -302,6 +302,10 @@ function createDeviceFromDriver() {
         metadata: $("#devMetadataURI")[0].value,
         driverName: selectedNode.data.name,
     }
+    let devCfg = $("#devCfg").val()
+    if (devCfg != " ") {
+      deviceMetadata["cfgString"] = devCfg
+    }
     console.log(JSON.stringify(deviceMetadata))
     showLoadingModal();
     $.post("http://localhost:8081/devices/", JSON.stringify(deviceMetadata), (data) => {
