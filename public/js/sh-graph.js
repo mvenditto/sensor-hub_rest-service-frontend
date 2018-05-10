@@ -303,7 +303,7 @@ function createDeviceFromDriver() {
         driverName: selectedNode.data.name,
     }
     let devCfg = $("#devCfg").val()
-    if (devCfg != " ") {
+    if (devCfg.length > 0) {
       deviceMetadata["cfgString"] = devCfg
     }
     console.log(JSON.stringify(deviceMetadata))
