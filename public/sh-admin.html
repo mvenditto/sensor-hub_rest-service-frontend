@@ -109,20 +109,23 @@
 
   </head>
 
+
+
   <ons-splitter>
     <ons-splitter-side id="menu" side="left" width="220px" collapse>
       <ons-page>
         <ons-list>
-          <ons-list-item onclick="fn.load('home.html')" tappable>
+          <ons-list-item onclick="fn.loadPage('home.html')" tappable>
             Home
           </ons-list-item>
-          <ons-list-item onclick="fn.load('dashboard.html')" tappable>
+          <ons-list-item onclick="fn.loadPage('dashboard.html')" tappable>
             DashBoard
           </ons-list-item>
         </ons-list>
       </ons-page>
     </ons-splitter-side>
-    <ons-splitter-content id="content" page="home.html"></ons-splitter-content>
+    <!--<ons-splitter-content id="content" page="home.html"></ons-splitter-content>-->
+    <ons-navigator id="content" page="home.html"></ons-navigator>
   </ons-splitter>
 
   <template id="dashboard.html">
@@ -176,16 +179,17 @@
         $("div.grid.muuri").css({height:"100%"})
 
         ons.getScriptPage().onInit = function() {
-          shGet(DATASTREAMS).then(dss => {
-            let dss_ = JSON.parse(dss)
-            dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
-            if (dss_.length > 0) {
-              let ds = dss_[0]
-              select_ds = ds.sensor.id + "_" + ds.name
-            }
-          })
 
-          this.onShow = function() {   console.log("onShow") };
+          this.onShow = function() {
+            shGet(DATASTREAMS).then(dss => {
+              let dss_ = JSON.parse(dss)
+              dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
+              if (dss_.length > 0) {
+                let ds = dss_[0]
+                select_ds = ds.sensor.id + "_" + ds.name
+              }
+            })
+          };
           this.onHide = function() {   console.log("onHide") };
           this.onDestroy = function() {   console.log("onDestroy") };
         };

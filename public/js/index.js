@@ -12,6 +12,11 @@ window.fn.load = function(page) {
     .then(menu.close.bind(menu));
 };
 
+window.fn.loadPage = function(page) {
+  var menu = document.getElementById('menu');
+  document.querySelector('#content').bringPageTop(page).then(menu.close.bind(menu))
+}
+
 var showTemplateDialog = function() {
   var dialog = document.getElementById('my-dialog');
 
