@@ -179,17 +179,16 @@
         $("div.grid.muuri").css({height:"100%"})
 
         ons.getScriptPage().onInit = function() {
+          shGet(DATASTREAMS).then(dss => {
+            let dss_ = JSON.parse(dss)
+            dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
+            if (dss_.length > 0) {
+              let ds = dss_[0]
+              select_ds = ds.sensor.id + "_" + ds.name
+            }
+          })
 
-          this.onShow = function() {
-            shGet(DATASTREAMS).then(dss => {
-              let dss_ = JSON.parse(dss)
-              dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
-              if (dss_.length > 0) {
-                let ds = dss_[0]
-                select_ds = ds.sensor.id + "_" + ds.name
-              }
-            })
-          };
+          this.onShow = function() {   console.log("onShow") };
           this.onHide = function() {   console.log("onHide") };
           this.onDestroy = function() {   console.log("onDestroy") };
         };
