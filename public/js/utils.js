@@ -6,6 +6,28 @@ auditWs.onmessage = function(event) {
   }
 }*/
 
+var select_ds = undefined
+
+function addDsGraph() {
+  if (select_ds != undefined) {
+    lineGraphCard("dash", select_ds)
+  }
+}
+
+function editSelects(event) {
+  select_ds = event.target.value
+  console.log(event.target.value)
+  document.getElementById('choose-sel').removeAttribute('modifier');
+  if (event.target.value == 'material' || event.target.value == 'underbar') {
+    document.getElementById('choose-sel').setAttribute('modifier', event.target.value);
+  }
+}
+function addOption(name) {
+  let option = document.createElement('option');
+  option.innerText = name;
+  $('#choose-sel select')[0].appendChild(option);
+}
+
 
 function obsDatastream() {
   let ds = node_interactions["selected"]
@@ -126,6 +148,86 @@ function jsonToOnsCard(j, title="") {
   });
 
   return card
+}
+
+var items = { }
+
+function removeItem(id) {
+  let item = items[id]
+  if (item != undefined) {
+    console.log("deleteing")
+    grid1.remove(item,{removeElements: true})
+    delete items[id]
+  }
+}
+
+function createAllItems() {
+  let opts = $("option")
+  var i
+  for(i=0; i<opts.length;i++){
+      createItem(opts[i].value)
+  }
+}
+
+function createItem(ds) {
+
+  let item = document.createElement("div")
+  item.classList.add("item")
+
+  let datastream = ds
+
+  let id = datastream + new Date().getTime()
+
+  item.setAttribute("id", id)
+
+  item.innerHTML =
+  `<ons-card>
+    <div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
+      <ons-row>
+        <ons-col><div>${datastream}</div></ons-col>
+        <ons-col>
+          <ons-button style="float: right; margin-bottom:10px;" onclick="removeItem('${id}');">
+            <ons-icon icon="md-close" size="16px"></ons-icon>
+          </ons-button>
+        </ons-col>
+      </ons-row>
+    </div>
+    <div class="content">
+      <div class="item-content">
+        <canvas width="400" height="140">
+      </div>
+    </div>
+  </ons-card>`
+
+  grid1.add(item)
+
+  var chart = new SmoothieChart({millisPerPixel: 49,
+    maxValueScale: 1.1,
+    minValueScale: 1.1,
+    grid: {
+      fillStyle:'#eaeaea',
+      strokeStyle:'rgba(119,119,119,0.19)',verticalSections:4},
+      labels:{fillStyle:'#9200a5'},
+      tooltip:true,
+      timestampFormatter:SmoothieChart.timeFormatter
+    }),
+  canvas = item.querySelector("canvas"),
+  series = new TimeSeries();
+
+  chart.addTimeSeries(series, {lineWidth:1.5,strokeStyle:'#4d8df5'});
+  chart.streamTo(canvas, 1000);
+
+  let ws = new WebSocket("ws://localhost:8081/" + datastream);
+  ws.onmessage = function(event) {
+    let json = JSON.parse(event.data)
+    if (json != undefined) {
+      series.append(new Date().getTime(), json);
+    }
+  }
+
+  items[id] = item
+  return item
+
 }
 
 let datastreamWS = document.createElement("ons-card")

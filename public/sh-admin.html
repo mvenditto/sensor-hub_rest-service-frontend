@@ -3,17 +3,20 @@
     <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsenui.css">
     <link rel="stylesheet" href="https://unpkg.com/onsenui/css/onsen-css-components.min.css">
     <link rel="stylesheet" href="css/vis-network.min.css"/>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg" crossorigin="anonymous">
     <link rel="stylesheet" href="css/stylesheet.css">
     <link rel="stylesheet" href="css/json.css">
     <link rel="stylesheet" href="css/jquery.enhsplitter.css">
     <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
     <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/web-animations.min.js"></script>
+    <script src="js/hammer.min.js"></script>
+    <script src="js/muuri.min.js"></script>
     <script src="js/vis.js"></script>
     <script src="js/index.js"></script>
     <script src="js/sh-graph.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/jquery.enhsplitter.js"></script>
+    <script src="js/smoothie.js"></script>
     <script type="text/javascript" src="js/renderjson.js"></script>
     <style>
         #mynetwork {
@@ -37,10 +40,163 @@
           width: 100%;
           display: inline-block;
         }
+
+
+        body {
+          display: flex;
+          justify-content: space-evenly;
+          margin: 20px 0;
+        }
+        .grid {
+          position: relative;
+          width: 99%;
+          height: 99%;
+          //background: #ccc;
+          border: 5px solid transparent;
+        }
+        .item {
+          position: absolute;
+          //width: 100px;
+          //height: 100px;
+          //line-height: 100px;
+          //margin: 5px;
+          z-index: 1;
+        }
+        .item.muuri-item-hidden {
+          z-index: 0;
+        }
+        .item.muuri-item-releasing {
+          z-index: 2;
+        }
+        .item.muuri-item-dragging {
+          z-index: 3;
+        }
+        .item-content {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          text-align: center;
+          //background: #bcc9de;
+          font-size: 30px;
+          color: white;
+          cursor: pointer;
+          border: 1px solid #bcbcbc;
+          //padding: 1%;
+        }
+
+        .item.muuri-item-dragging .item-content,
+        .item.muuri-item-releasing .item-content {
+          //background: blue;
+        }
+
+        div.smoothie-chart-tooltip {
+          background: #444;
+          padding: 1em;
+          margin-top: 20px;
+          font-family: consolas;
+          color: white;
+          font-size: 10px;
+          pointer-events: none;
+        }
+
+        ons-select {
+          padding-right: 20px;
+          padding-left: 20px;
+          padding-top: 4px;
+          border: 1px solid #bcbcbc;
+        }
     </style>
+
   </head>
 
-  <body>
+  <ons-splitter>
+    <ons-splitter-side id="menu" side="left" width="220px" collapse>
+      <ons-page>
+        <ons-list>
+          <ons-list-item onclick="fn.load('home.html')" tappable>
+            Home
+          </ons-list-item>
+          <ons-list-item onclick="fn.load('dashboard.html')" tappable>
+            DashBoard
+          </ons-list-item>
+        </ons-list>
+      </ons-page>
+    </ons-splitter-side>
+    <ons-splitter-content id="content" page="home.html"></ons-splitter-content>
+  </ons-splitter>
+
+  <template id="dashboard.html">
+    <ons-page>
+      <ons-toolbar>
+        <div class="left">
+          <ons-toolbar-button onclick="fn.open()">
+            <ons-icon icon="md-menu"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <div class="center" style="color: #4286f4;">
+          Sensors-Hub DashBoard
+        </div>
+      </ons-toolbar>
+      <div id="dash">
+        <ons-row>
+          <ons-col>
+            <ons-select style="width:100%;margin: 4px" id="choose-sel" onchange="editSelects(event)">
+            </ons-select>
+          </ons-col>
+          <ons-col>
+            <ons-button style="margin-top: 3px; margin-left:50px;" onclick="createItem(select_ds)">
+              <ons-icon icon="md-plus" size="24px"></ons-icon>
+            </ons-button>
+            <ons-button style="margin-top: 3px;" onclick="createAllItems()">
+              <ons-icon icon="md-chart" size="24px"></ons-icon>
+            </ons-button>
+          </ons-col>
+        </ons-row>
+        <div>
+          <!---
+          <ons-card>
+            <div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">Graph</div>
+            <div id="graphContainer" class="content"></div>
+          </ons-card>-->
+        </div>
+        <div class="grid">
+        </div>
+      </div>
+      <script type="text/javascript">
+
+        var grid1 = new Muuri('.grid', {
+          removeElements: true,
+          dragEnabled: true,
+          dragContainer: document.body,
+          dragSort: function () {
+            return [grid1]
+          }
+        });
+
+        $("div.grid.muuri").css({height:"100%"})
+
+        ons.getScriptPage().onInit = function() {
+          shGet(DATASTREAMS).then(dss => {
+            let dss_ = JSON.parse(dss)
+            dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
+            if (dss_.length > 0) {
+              let ds = dss_[0]
+              select_ds = ds.sensor.id + "_" + ds.name
+            }
+          })
+
+          this.onShow = function() {   console.log("onShow") };
+          this.onHide = function() {   console.log("onHide") };
+          this.onDestroy = function() {   console.log("onDestroy") };
+        };
+
+
+
+      </script>
+    </ons-page>
+  </template>
+
+  <template id="home.html">
     <ons-page>
       <ons-toolbar>
         <div class="left">
@@ -57,12 +213,21 @@
         <div id="mynetwork"></div>
       </div>
       <script type="text/javascript">
-        renderjson.set_show_to_level(1);
-        $('#root-container').enhsplitter({position: '30%'});
-        $(document).ready(r => shBuildSystemGraph())
+
+        ons.getScriptPage().onInit = function() {
+
+          renderjson.set_show_to_level(1);
+          $('#root-container').enhsplitter({position: '30%'});
+          $(document).ready(r => shBuildSystemGraph())
+
+          this.onShow = function() {   console.log("onShow") };
+          this.onHide = function() {   console.log("onHide") };
+          this.onDestroy = function() {   console.log("onDestroy") };
+        };
+
       </script>
     </ons-page>
-  </body>
+  </template>
 
   <template id="dialog.html">
     <ons-alert-dialog id="my-dialog" modifier="rowfooter">
@@ -80,7 +245,7 @@
   <ons-modal id="loading-modal" direction="up">
     <div style="text-align: center">
       <p>
-        <ons-icon icon="md-spinner" size="28px" spin></ons-icon> Loading...
+        <ons-icon icon="fa-spinner" size="28px" spin></ons-icon> Loading...
       </p>
     </div>
   </ons-modal>
