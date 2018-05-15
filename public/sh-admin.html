@@ -17,6 +17,7 @@
     <script src="js/utils.js"></script>
     <script src="js/jquery.enhsplitter.js"></script>
     <script src="js/smoothie.js"></script>
+    <script src="js/interact.min.js"></script>
     <script type="text/javascript" src="js/renderjson.js"></script>
     <style>
         #mynetwork {
@@ -42,25 +43,26 @@
         }
 
 
-        body {
+        /*body {
           display: flex;
           justify-content: space-evenly;
-          margin: 20px 0;
-        }
+        }*/
         .grid {
           position: relative;
-          width: 99%;
-          height: 99%;
-          //background: #ccc;
           border: 5px solid transparent;
         }
         .item {
+          display: inline-block;
           position: absolute;
-          //width: 100px;
-          //height: 100px;
-          //line-height: 100px;
-          //margin: 5px;
+          width: 500px;
+          height: 150px;
+          min-width:300px;
+          min-height:100px;
           z-index: 1;
+          box-sizing: border-box;
+          background-color: #dddddd;
+          margin:20px;
+          padding: 4px 4px 6px;
         }
         .item.muuri-item-hidden {
           z-index: 0;
@@ -73,20 +75,16 @@
         }
         .item-content {
           position: relative;
-          width: 100%;
-          height: 100%;
           text-align: center;
-          //background: #bcc9de;
-          font-size: 30px;
+          background: #dddddd;
           color: white;
-          cursor: pointer;
           border: 1px solid #bcbcbc;
-          //padding: 1%;
+          //padding: 2%;
         }
 
         .item.muuri-item-dragging .item-content,
         .item.muuri-item-releasing .item-content {
-          //background: blue;
+          background: blue;
         }
 
         div.smoothie-chart-tooltip {
@@ -105,8 +103,15 @@
           padding-top: 4px;
           border: 1px solid #bcbcbc;
         }
-    </style>
 
+        canvas {
+          position: relative;
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+    </style>
   </head>
 
 
@@ -162,21 +167,39 @@
             <div id="graphContainer" class="content"></div>
           </ons-card>-->
         </div>
-        <div class="grid">
-        </div>
+        <div class="grid"></div>
       </div>
       <script type="text/javascript">
-
         var grid1 = new Muuri('.grid', {
+          layout: {
+            fillGaps: false,
+            horizontal: false,
+            alignRight: false,
+            alignBottom: false,
+            rounding: false
+          },
           removeElements: true,
           dragEnabled: true,
-          dragContainer: document.body,
+          dragContainer: null,//document.getElementById("dash"),
+          dragStartPredicate: function(item, event) {
+            let bbox = item._element.getBoundingClientRect()
+            let c = event.center
+            let canDrag = (c.x >= bbox.x + 30
+            && c.y >= bbox.y + 30
+            && c.x <= (bbox.width + bbox.x - 30)
+            && c.y <= (bbox.height + bbox.y - 30))
+            return canDrag
+
+          },
           dragSort: function () {
             return [grid1]
           }
-        });
+        })
+        .on('dragInit', function (item, event) { });
 
-        $("div.grid.muuri").css({height:"100%"})
+        //$("div.grid.muuri").css({height:"100%"})
+
+        makeItemsResizable()
 
         ons.getScriptPage().onInit = function() {
           shGet(DATASTREAMS).then(dss => {

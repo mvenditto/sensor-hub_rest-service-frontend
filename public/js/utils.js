@@ -1,11 +1,3 @@
-/*let auditWs = new WebSocket("ws://localhost:8081/audit");
-auditWs.onmessage = function(event) {
-  let json = JSON.parse(event.data)
-  if (json != undefined) {
-    console.log(json)
-  }
-}*/
-
 var select_ds = undefined
 
 function addDsGraph() {
@@ -169,6 +161,41 @@ function createAllItems() {
   }
 }
 
+function makeItemsResizable() {
+  interact('.item')
+  /*.draggable({
+    onmove: window.dragMoveListener,
+    restrict: {
+      restriction: 'parent',
+      elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+    },
+  })*/
+  .resizable({
+    edges: { left: false, right: true, bottom: true, top: false },
+    restrictEdges: {
+      outer: 'parent',
+      endOnly: true,
+    },
+    restrictSize: {
+      min: { width: 100, height: 100 },
+    },
+    inertia: false,
+  })
+  .on('resizemove', function (event) {
+    let rect = interact.getElementRect(event.target.querySelector(".item-content"))
+    let target = event.target;
+    //let r = event.target.getBoundingClientRect();
+    //console.log(r.x, r.y, event.rect)
+    console.log(event.rect.width, event.rect.height, rect.width, rect.height)
+    target.style.width = (event.rect.width) +"px";
+    target.style.height = (event.rect.height) + "px";
+    grid1.refreshItems(target).layout()
+  })
+  .on('resizeend', function (event) {
+    grid1.refreshItems().layout()
+  });
+}
+
 function createItem(ds) {
 
   let item = document.createElement("div")
@@ -181,29 +208,32 @@ function createItem(ds) {
   item.setAttribute("id", id)
 
   item.innerHTML =
-  `<ons-card>
-    <div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
-      <ons-row>
-        <ons-col><div>${datastream}</div></ons-col>
-        <ons-col>
-          <ons-button style="float: right; margin-bottom:10px;" onclick="removeItem('${id}');">
-            <ons-icon icon="md-close" size="16px"></ons-icon>
-          </ons-button>
-        </ons-col>
-      </ons-row>
-    </div>
-    <div class="content">
-      <div class="item-content">
-        <canvas width="400" height="140">
-      </div>
-    </div>
-  </ons-card>`
+  `<div class="item-content"><canvas></canvas></div>`
+  /*
+  `
+  <div class="item-content">
+  <!--<div >-->
+      <!--<div style="color: #4286f4;">
+        <ons-row>
+          <ons-col><div>${datastream}</div></ons-col>
+          <ons-col>
+            <ons-button style="float: right; margin-bottom:10px;" onclick="removeItem('${id}');">
+              <ons-icon icon="md-close" size="16px"></ons-icon>
+            </ons-button>
+          </ons-col>
+        </ons-row>
+      </div>-->
+      <!-- <div class="outer" style="border: 1px solid #bcbcbc;">-->
+        <canvas style="width:100%; height:100%;"></canvas>
+      <!--</div>-->
+    <!--</div>-->
+  </div>`*/
 
-  grid1.add(item)
 
   var chart = new SmoothieChart({millisPerPixel: 49,
     maxValueScale: 1.1,
     minValueScale: 1.1,
+    responsive: true,
     grid: {
       fillStyle:'#eaeaea',
       strokeStyle:'rgba(119,119,119,0.19)',verticalSections:4},
@@ -225,6 +255,8 @@ function createItem(ds) {
     }
   }
 
+  grid1.add(item)
+  //grid1.refreshItems(item).layout()
   items[id] = item
   return item
 
