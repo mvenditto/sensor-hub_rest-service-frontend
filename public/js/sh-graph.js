@@ -8,15 +8,21 @@ let DATASTREAMS = 'dataStreams'
 let SERVICES = 'services'
 let PROPERTIES = 'observedProperties'
 let TASKS = DEVICES + '/tasks'
+let FOVS = 'featuresOfInterest'
 
 let HUBS_GROUP = 'hubs'
 let THINGS_GROUP = 'things'
 let DEVICES_GROUP = 'sensors'
+let COLLAPSED_DEVICE = 'collapsed_sensors'
 let DRIVERS_GROUP = 'drivers'
 let PROPERTIES_GROUP = 'properties'
 let SERVICES_GROUP = 'services'
 let DATASTREAMS_GROUP = 'datastreams'
 let TASKS_GROUP = 'tasks'
+let FOVS_GROUP = 'features_of_interest'
+
+var data = {}
+var network = undefined
 
 function shGet(resourceName) {return $.get(SH_REST_SERVER + resourceName) }
 
@@ -65,13 +71,24 @@ function shBuildSystemGraph() {
     return devId
   }
 
+  function findFeatureId(name) {
+    var fovId = undefined
+    nodes.forEach(n => {
+      if (n.group == FOVS_GROUP && n.data.name == name) {
+        fovId = n.id
+      }
+    })
+    return fovId
+  }
+
   Promise.all([
     shGet(SERVICES),
     shGet(DRIVERS),
     shGet(DEVICES),
     shGet(PROPERTIES),
     shGet(DATASTREAMS),
-    shGet(TASKS)]
+    shGet(TASKS),
+    shGet(FOVS)]
   ).then(results => {
 
     let services = JSON.parse(results[0])
@@ -80,6 +97,7 @@ function shBuildSystemGraph() {
     let properties = JSON.parse(results[3])
     let dataStreams = JSON.parse(results[4])
     let tasks = JSON.parse(results[5])
+    let features = JSON.parse(results[6])
 
     services.forEach(s => {
       nodes.add({id: ids, label:s.name, group:SERVICES_GROUP, data:s, level:0})
@@ -88,7 +106,7 @@ function shBuildSystemGraph() {
     })
 
     drivers.forEach(drv => {
-      nodes.add({id: ids, label:drv.name, group:DRIVERS_GROUP, data:drv, level: 3})
+      nodes.add({id: ids, label:drv.name, group:DRIVERS_GROUP, data:drv, level: 2})//3
       edges.add({from: sh.id, to: ids})
       ids = ids + 1
     })
@@ -103,7 +121,7 @@ function shBuildSystemGraph() {
       if (devTasks != undefined) {
         devTasks.supportedTasks.forEach(t => {
           t.deviceId = dev.id
-          nodes.add({id: ids, label:t.title, group:TASKS_GROUP, data:t, level:5})
+          nodes.add({id: ids, label:t.title, group:TASKS_GROUP, data:t, level:5, widthConstraint: {maximum: 100}})
           edges.add({from:devId, to:ids})
           ids = ids + 1
         })
@@ -115,24 +133,52 @@ function shBuildSystemGraph() {
       ids = ids + 1
     })
 
+    features.forEach(fov => {
+      nodes.add({id:ids, label:fov.name, group:FOVS_GROUP, level:6, data:fov})
+      ids = ids + 1
+    })
+
     dataStreams.forEach(ds => {
       nodes.add({id:ids, label:ds.name, group:DATASTREAMS_GROUP, data:ds, level:5})
       edges.add({from:findDeviceId(ds.sensor.id), to: ids})
-      edges.add({from:ids, to:findPropId(ds.observedProperty.definition)})
+      let propId = findPropId(ds.observedProperty.definition)
+      edges.add({from:ids, to:propId})
+      edges.add({from:propId, to:findFeatureId(ds.featureOfInterest.name)})
       ids = ids + 1
     })
 
     var container = document.getElementById('mynetwork');
-    var data = {
+    data = {
         nodes: Array.from(nodes),
         edges: Array.from(edges)
     };
-    var network = new vis.Network(container, data, options);
+    network = new vis.Network(container, data, options);
     shInitGraphEvents(network);
     $("#mynetwork canvas").bind("contextmenu", (e) => false);
     $(document).ready(d => network.redraw())
+    $("#mynetwork").prepend(graphMenu)
     hideLoadingModal()
   })
+}
+
+function collapseNode() {
+  let selectedNode = node_interactions["selected"]
+  if (selectedNode != undefined && network != undefined) {
+    //network.setData(data)
+    var clusterOptionsByData = {
+      joinCondition:function(parentOpts, childOpts) {
+        console.log(childOpts.group, childOpts.id)
+        let cond = childOpts.group === DATASTREAMS_GROUP|| childOpts.group === TASKS_GROUP || childOpts.group === PROPERTIES_GROUP
+        return cond;
+      },
+      clusterNodeProperties: {
+        label:selectedNode.label + "\n[collapsed]",
+        group: COLLAPSED_DEVICE,
+        level: selectedNode.level
+      }
+    };
+    network.clusterByConnection(selectedNode.id, clusterOptionsByData)
+  }
 }
 
 function shInitGraphEvents(network) {
@@ -145,6 +191,14 @@ function shInitGraphEvents(network) {
 
   network.on("oncontext", function (params) {
     console.log(node_interactions["hovered"])
+  });
+
+  network.on("selectNode", function(params) {
+        if (params.nodes.length == 1) {
+            if (network.isCluster(params.nodes[0]) == true) {
+                network.openCluster(params.nodes[0]);
+            }
+        }
   });
 
   network.on("click", function (params) {
@@ -185,7 +239,8 @@ var options = {
       hierarchical: {
         //sortMethod: "directed"
         direction: "DU"
-      }
+      },
+      randomSeed: 8
     },
     nodes: {
         shape: 'dot',
@@ -194,81 +249,127 @@ var options = {
             size: 15,
             color: '#121212'
         },
-        borderWidth: 2
+        borderWidth: 2,
+        font: {
+          size: 24
+        }
     },
     edges: {
-        width: 1,
+        width: 1.5,
         smooth: true,
-        color: {color: "#4286f4"},
+        color: {
+          highlight: "#4286f4",
+          hover: "#6891d8",
+          color: "#8c9199",
+        },
         arrows: "to"
     },
     groups: {
         sensors: {
+          shape: 'image',
+          image : 'imgs/sensor.png',
+          size: 30
+            /*
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 code: '\uf2db',
                 size: 50,
                 color: '#FB9537'
-            }
+            }*/
+        },
+        collapsed_sensors: {
+            shape: 'image',
+            image: 'imgs/collapsed_sensor.png',
+            size: 30
         },
         drivers: {
+          shape: 'image',
+          image : 'imgs/gearwheels-couple.svg',
+          size: 30
+            /*
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 code: '\uf085',
                 size: 50,
                 color: '#707070'
-            }
+            }*/
         },
         datastreams: {
-            shape: 'icon',
+          shape: 'image',
+          image : 'imgs/pulse.svg',
+          size: 35
+          /*shape: 'icon',
             icon: {
                 face: 'Ionicons',
                 code: '\uf492',
                 size: 50,
                 color: '#484749'
-            }
+            }*/
         },
         tasks: {
             shape: 'image',
-            image: 'imgs/task.svg'
+            image: 'imgs/cogwheel-arrow.svg',
+            size: 25,
+            font: {
+              size: 18
+            }
         },
         properties: {
+          shape: 'image',
+          image : 'imgs/hub.png',
+          size: 27
+            /*
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 code: '\uf288',
                 size: 50,
                 color: '#BF1A2F'
-            }
+            }*/
+        },
+        features_of_interest: {
+          shape: 'image',
+          image : 'imgs/magnifier-with-an-eye.png',
+          size: 30
         },
         hubs: {
-            shape: 'icon',
+          shape: 'image',
+          image : 'imgs/server.svg',
+          size: 20
+            /*shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 code: '\uf233',
                 size: 50,
                 color: '#4286f4'
-            }
+            }*/
         },
         things: {
-            shape: 'icon',
+          shape: 'image',
+          image : 'imgs/wireless-internet.png',
+          size: 30
+            /*shape: 'icon',
             icon: {
                 face: 'Ionicons',
                 code: '\uf2ac',
                 size: 50,
                 color: '#138A36'
-            }
+            }*/
         },
         services: {
+        shape: 'image',
+        image : 'imgs/puzzle-piece.svg',
+        size: 25
+          /*
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 code: '\uf1b2',
                 size: 50,
                 color: '#9E788F'
-            }
+            }*/
         }
     }
 };

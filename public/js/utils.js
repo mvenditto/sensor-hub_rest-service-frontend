@@ -208,7 +208,12 @@ function createItem(ds) {
   item.setAttribute("id", id)
 
   item.innerHTML =
-  `<div class="item-content"><canvas></canvas></div>`
+  `<div class="item-content">
+    <div class="item-item">
+      <p>paceholder</p>
+      <canvas></canvas>
+    </div>
+  </div>`
   /*
   `
   <div class="item-content">
@@ -262,6 +267,19 @@ function createItem(ds) {
 
 }
 
+function toggleGraphMenu(){
+    let graphMenu = $("#mynetwork ons-toolbar")
+    let graphMenuToggleIcon = $("#toggle-graph-menu")[0]
+    graphMenu.slideToggle(e => {
+      if (graphMenu.is(":visible")) {
+        graphMenuToggleIcon.setAttribute("icon", "md-chevron-up")
+      } else {
+        graphMenuToggleIcon.setAttribute("icon", "md-chevron-down")
+      }
+    })
+}
+
+
 let datastreamWS = document.createElement("ons-card")
 datastreamWS.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
       Peek into this DataStream
@@ -293,6 +311,19 @@ deviceCreationForm.innerHTML = `<div class="title" style="color: #4286f4; border
       </div>
     </div>
   </ons-card>`
+
+let graphMenu = document.createElement("div")
+graphMenu.innerHTML =
+`<ons-toolbar>
+  <div class="left">
+    <ons-toolbar-button onclick="">
+      <ons-icon icon="md-plus"></ons-icon>
+    </ons-toolbar-button>
+    <ons-toolbar-button onclick="collapseNode()">
+      <ons-icon icon="md-minus"></ons-icon>
+    </ons-toolbar-button>
+  </div>
+</ons-toolbar>`
 
 let taskDebug = document.createElement("ons-card")
 taskDebug.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">

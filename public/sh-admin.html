@@ -54,8 +54,8 @@
         .item {
           display: inline-block;
           position: absolute;
-          width: 500px;
-          height: 150px;
+          //width: 500px;
+          //height: 150px;
           min-width:300px;
           min-height:100px;
           z-index: 1;
@@ -87,6 +87,12 @@
           background: blue;
         }
 
+        .item-item {
+          position: relative;
+          display: block;
+          box-sizing: border-box;
+        }
+
         div.smoothie-chart-tooltip {
           background: #444;
           padding: 1em;
@@ -105,8 +111,8 @@
         }
 
         canvas {
-          position: relative;
-          display: block;
+          //position: relative;
+          //display: block;
           width: 100%;
           height: 100%;
         }
@@ -228,6 +234,11 @@
         <div class="left">
           <ons-toolbar-button onclick="fn.open()">
             <ons-icon icon="md-menu"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <div class="right">
+          <ons-toolbar-button onclick="toggleGraphMenu()">
+            <ons-icon id="toggle-graph-menu" icon="md-chevron-up"></ons-icon>
           </ons-toolbar-button>
         </div>
         <div class="center" style="color: #4286f4;">

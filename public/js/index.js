@@ -14,7 +14,8 @@ window.fn.load = function(page) {
 
 window.fn.loadPage = function(page) {
   var menu = document.getElementById('menu');
-  document.querySelector('#content').bringPageTop(page).then(menu.close.bind(menu))
+  document.querySelector('#content').bringPageTop(page)//.then(menu.close.bind(menu))
+  menu.close()
 }
 
 var showTemplateDialog = function() {
