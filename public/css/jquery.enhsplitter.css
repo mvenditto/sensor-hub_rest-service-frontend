@@ -90,8 +90,9 @@
   display: none;
 }
 .splitter-vertical > .splitter_bar {
-  border-left: 1px solid #eeeeee;
+  border-left: 1px solid #83888d;
   border-right: 1px solid #666666;
+  background: #54606b;
   cursor: ew-resize;
   z-index: 900;
   width: 7px;

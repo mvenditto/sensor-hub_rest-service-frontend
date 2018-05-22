@@ -121,7 +121,7 @@ function jsonToOnsCard(j, title="") {
   card.setAttribute("style", "")
 
   card.innerHTML =
-     `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">${cardTitle}</div>
+     `<div class="title" style="border-bottom: 1px solid #CAD3C8;">${cardTitle}</div>
      <div id="content" class="content"></div>`
 
   let content = card.querySelector("#content")
@@ -214,27 +214,7 @@ function createItem(ds) {
       <canvas></canvas>
     </div>
   </div>`
-  /*
-  `
-  <div class="item-content">
-  <!--<div >-->
-      <!--<div style="color: #4286f4;">
-        <ons-row>
-          <ons-col><div>${datastream}</div></ons-col>
-          <ons-col>
-            <ons-button style="float: right; margin-bottom:10px;" onclick="removeItem('${id}');">
-              <ons-icon icon="md-close" size="16px"></ons-icon>
-            </ons-button>
-          </ons-col>
-        </ons-row>
-      </div>-->
-      <!-- <div class="outer" style="border: 1px solid #bcbcbc;">-->
-        <canvas style="width:100%; height:100%;"></canvas>
-      <!--</div>-->
-    <!--</div>-->
-  </div>`*/
-
-
+  
   var chart = new SmoothieChart({millisPerPixel: 49,
     maxValueScale: 1.1,
     minValueScale: 1.1,
@@ -281,7 +261,7 @@ function toggleGraphMenu(){
 
 
 let datastreamWS = document.createElement("ons-card")
-datastreamWS.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
+datastreamWS.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
       Peek into this DataStream
     </div>
     <div class="content">
@@ -296,7 +276,7 @@ datastreamWS.innerHTML = `<div class="title" style="color: #4286f4; border-botto
   </ons-card>`
 
 let deviceCreationForm = document.createElement("ons-card")
-deviceCreationForm.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
+deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
       Create a device with this Driver
     </div>
     <div class="content">
@@ -305,7 +285,7 @@ deviceCreationForm.innerHTML = `<div class="title" style="color: #4286f4; border
         <p><ons-input id="devDesc" modifier="underbar" placeholder="Brief description" float></ons-input></p>
         <p><ons-input id="devMetadataEncoding" modifier="underbar" placeholder="application/pdf" float></ons-input></p>
         <p><ons-input id="devMetadataURI" modifier="underbar" placeholder="http://example.org/schema.pdf" float></ons-input></p>
-        <p style="color: gray;">configuration [optional]:</p>
+        <p>configuration [optional]:</p>
         <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%;"></textarea></p>
         <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
       </div>
@@ -326,7 +306,7 @@ graphMenu.innerHTML =
 </ons-toolbar>`
 
 let taskDebug = document.createElement("ons-card")
-taskDebug.innerHTML = `<div class="title" style="color: #4286f4; border-bottom: 1px solid #4286f4;">
+taskDebug.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
       Execute Task
     </div>
     <div class="content">

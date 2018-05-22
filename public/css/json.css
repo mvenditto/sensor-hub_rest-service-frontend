@@ -1,11 +1,12 @@
+
 .renderjson a              { text-decoration: none; }
-.renderjson .disclosure    { color: #4286f4;
+.renderjson .disclosure    { color: #FEA47F;
                              font-size: 100%; }
 .renderjson .syntax        { color: darkgrey; }
 .renderjson .string        { color: #47B9A8; }
-.renderjson .number        { color: #EE9269; }
+.renderjson .number        { color: #e16da3; }
 .renderjson .boolean       { color: #BB54A8; }
-.renderjson .key           { color: #747272; }
-.renderjson .keyword       { color: #E38C71; }
-.renderjson .object.syntax { color: #545E70; }
-.renderjson .array.syntax  { color: #545E70; }
+.renderjson .key           { color: #a3a097; }
+.renderjson .keyword       { color: #8fd089; }
+.renderjson .object.syntax { color: #6e7a84; }
+.renderjson .array.syntax  { color: #6e7a84; }
