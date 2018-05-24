@@ -217,8 +217,17 @@ function shInitGraphEvents(network) {
         }
 
         if (n.group === DATASTREAMS_GROUP) {
+          c.appendChild(datastreamChart)
           c.appendChild(datastreamWS);
+          let chart_container = $("#ds_chart")[0]
+          while(chart_container.firstChild) {
+            chart_container.removeChild(chart_container.firstChild)
+          }
+          let ds = node_interactions["selected"].data
+          let ds_id = ds.sensor.id + "_" + ds.name
+          chart_container.appendChild(createChart(ds_id))
         }
+
 
         if(n.group == TASKS_GROUP){
           c.appendChild(taskDebug)

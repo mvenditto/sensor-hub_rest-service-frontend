@@ -214,7 +214,7 @@ function createItem(ds) {
       <canvas></canvas>
     </div>
   </div>`
-  
+
   var chart = new SmoothieChart({millisPerPixel: 49,
     maxValueScale: 1.1,
     minValueScale: 1.1,
@@ -259,6 +259,12 @@ function toggleGraphMenu(){
     })
 }
 
+let datastreamChart = document.createElement("ons-card")
+datastreamChart.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
+      Real-time data
+    </div>
+    <div class="content" id="ds_chart"></div>
+  </ons-card>`
 
 let datastreamWS = document.createElement("ons-card")
 datastreamWS.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
@@ -266,10 +272,9 @@ datastreamWS.innerHTML = `<div class="title" style="border-bottom: 1px solid #CA
     </div>
     <div class="content">
       <ons-row>
-        <ons-col width="30%">
+        <ons-col>
           <ons-button onclick="obsDatastream();">Read Obs.</ons-button>
-        </ons-col>
-        <ons-col width="70%" id="ds-obs">
+          <div id="ds-obs"></div>
         </ons-col>
       </ons-row>
     </div>
@@ -323,3 +328,39 @@ taskDebug.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C
       </ons-row>
     </div>
   </ons-card>`
+
+function createChart(ds) {
+
+    let item = document.createElement("div")
+
+    let datastream = ds
+
+    let id = datastream + new Date().getTime()
+
+    item.setAttribute("id", id)
+
+    item.innerHTML =
+    `<canvas style="width:100%; height:80px"></canvas>`
+
+    var chart = new SmoothieChart({millisPerPixel: 49,
+      maxValueScale: 1.1,
+      minValueScale: 1.1,
+      responsive: true,
+      grid: {
+        fillStyle:'#112334'
+      }}),
+      canvas = item.querySelector("canvas"),
+      series = new TimeSeries();
+
+      chart.addTimeSeries(series, {lineWidth:1.4,strokeStyle:'#d6a2e8', fillStyle:"rgb(214, 162, 232, 0.3)"});
+      chart.streamTo(canvas, 1000);
+
+      let ws = new WebSocket("ws://localhost:8081/" + datastream);
+      ws.onmessage = function(event) {
+        let json = JSON.parse(event.data)
+        if (json != undefined) {
+          series.append(new Date().getTime(), json);
+        }
+      }
+      return item
+  }
