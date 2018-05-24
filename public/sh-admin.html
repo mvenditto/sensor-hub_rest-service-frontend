@@ -12,7 +12,6 @@
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/web-animations.min.js"></script>
     <script src="js/hammer.min.js"></script>
-    <script src="js/muuri.min.js"></script>
     <script src="js/vis.js"></script>
     <script src="js/index.js"></script>
     <script src="js/sh-graph.js"></script>
@@ -174,104 +173,12 @@
           <ons-list-item onclick="fn.loadPage('home.html')" tappable>
             Home
           </ons-list-item>
-          <ons-list-item onclick="fn.loadPage('dashboard.html')" tappable>
-            DashBoard
-          </ons-list-item>
         </ons-list>
       </ons-page>
     </ons-splitter-side>
     <!--<ons-splitter-content id="content" page="home.html"></ons-splitter-content>-->
     <ons-navigator id="content" page="home.html"></ons-navigator>
   </ons-splitter>
-
-  <template id="dashboard.html">
-    <ons-page>
-      <ons-toolbar>
-        <div class="left">
-          <ons-toolbar-button onclick="fn.open()">
-            <ons-icon icon="md-menu"></ons-icon>
-          </ons-toolbar-button>
-        </div>
-        <div class="center">
-          Sensors-Hub DashBoard
-        </div>
-      </ons-toolbar>
-      <div id="dash">
-        <ons-row>
-          <ons-col>
-            <ons-select style="width:100%;margin: 4px" id="choose-sel" onchange="editSelects(event)">
-            </ons-select>
-          </ons-col>
-          <ons-col>
-            <ons-button style="margin-top: 3px; margin-left:50px;" onclick="createItem(select_ds)">
-              <ons-icon icon="md-plus" ></ons-icon>
-            </ons-button>
-            <ons-button style="margin-top: 3px;" onclick="createAllItems()">
-              <ons-icon icon="md-chart"></ons-icon>
-            </ons-button>
-          </ons-col>
-        </ons-row>
-        <div>
-          <!---
-          <ons-card>
-            <div class="title" style="color: #CAD3C8; border-bottom: 1px solid #CAD3C8;">Graph</div>
-            <div id="graphContainer" class="content"></div>
-          </ons-card>-->
-        </div>
-        <div class="grid"></div>
-      </div>
-      <script type="text/javascript">
-        var grid1 = new Muuri('.grid', {
-          layout: {
-            fillGaps: false,
-            horizontal: false,
-            alignRight: false,
-            alignBottom: false,
-            rounding: false
-          },
-          removeElements: true,
-          dragEnabled: true,
-          dragContainer: null,//document.getElementById("dash"),
-          dragStartPredicate: function(item, event) {
-            let bbox = item._element.getBoundingClientRect()
-            let c = event.center
-            let canDrag = (c.x >= bbox.x + 30
-            && c.y >= bbox.y + 30
-            && c.x <= (bbox.width + bbox.x - 30)
-            && c.y <= (bbox.height + bbox.y - 30))
-            return canDrag
-
-          },
-          dragSort: function () {
-            return [grid1]
-          }
-        })
-        .on('dragInit', function (item, event) { });
-
-        //$("div.grid.muuri").css({height:"100%"})
-
-        makeItemsResizable()
-
-        ons.getScriptPage().onInit = function() {
-          shGet(DATASTREAMS).then(dss => {
-            let dss_ = JSON.parse(dss)
-            dss_.forEach(ds => addOption(ds.sensor.id + "_" + ds.name))
-            if (dss_.length > 0) {
-              let ds = dss_[0]
-              select_ds = ds.sensor.id + "_" + ds.name
-            }
-          })
-
-          this.onShow = function() {   console.log("onShow") };
-          this.onHide = function() {   console.log("onHide") };
-          this.onDestroy = function() {   console.log("onDestroy") };
-        };
-
-
-
-      </script>
-    </ons-page>
-  </template>
 
   <template id="home.html">
     <ons-page>

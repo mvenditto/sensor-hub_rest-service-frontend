@@ -280,6 +280,18 @@ datastreamWS.innerHTML = `<div class="title" style="border-bottom: 1px solid #CA
     </div>
   </ons-card>`
 
+function hideDevCfg() {
+  devcfgMenu = $('#devCfg')
+  let devcfgMenuToggleIcon = $("#toggle-devcfg-menu")[0]
+  devcfgMenu.slideToggle(e => {
+    if (devcfgMenu.is(":visible")) {
+      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-up")
+    } else {
+      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-down")
+    }
+  })
+}
+
 let deviceCreationForm = document.createElement("ons-card")
 deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
       Create a device with this Driver
@@ -290,8 +302,13 @@ deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px sol
         <p><ons-input id="devDesc" modifier="underbar" placeholder="Brief description" float></ons-input></p>
         <p><ons-input id="devMetadataEncoding" modifier="underbar" placeholder="application/pdf" float></ons-input></p>
         <p><ons-input id="devMetadataURI" modifier="underbar" placeholder="http://example.org/schema.pdf" float></ons-input></p>
-        <p>configuration [optional]:</p>
-        <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%;"></textarea></p>
+        <div>
+          configuration [optional]:
+          <ons-toolbar-button onclick="hideDevCfg();">
+            <ons-icon id="toggle-devcfg-menu" icon="md-chevron-down"></ons-icon>
+          </ons-toolbar-button>
+        </div>
+        <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%; display:none;"></textarea></p>
         <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
       </div>
     </div>
