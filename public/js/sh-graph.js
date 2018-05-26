@@ -158,6 +158,7 @@ function shBuildSystemGraph() {
     $(document).ready(d => network.redraw())
     $("#mynetwork").prepend(graphMenu)
     hideLoadingModal()
+    $(".splitter_panel").css({"overflow": "hidden"})
   })
 }
 
@@ -217,15 +218,18 @@ function shInitGraphEvents(network) {
         }
 
         if (n.group === DATASTREAMS_GROUP) {
-          c.appendChild(datastreamChart)
-          c.appendChild(datastreamWS);
-          let chart_container = $("#ds_chart")[0]
-          while(chart_container.firstChild) {
-            chart_container.removeChild(chart_container.firstChild)
-          }
           let ds = node_interactions["selected"].data
-          let ds_id = ds.sensor.id + "_" + ds.name
-          chart_container.appendChild(createChart(ds_id))
+          let ot = ds.observationType.split('/')
+          if(ot[ot.length - 1] === "OM_Measurement") {
+            c.appendChild(datastreamChart)
+            let chart_container = $("#ds_chart")[0]
+            while(chart_container.firstChild) {
+              chart_container.removeChild(chart_container.firstChild)
+            }
+            let ds_id = ds.sensor.id + "_" + ds.name
+            chart_container.appendChild(createChart(ds_id))
+            c.appendChild(datastreamWS);
+          }
         }
 
 
@@ -415,6 +419,10 @@ function createDeviceFromDriver() {
     let devCfg = $("#devCfg").val()
     if (devCfg.length > 0) {
       deviceMetadata["cfgString"] = devCfg
+    }
+    let propCfg = $("#propCfg").val()
+    if (propCfg.length > 0) {
+      deviceMetadata["dsProps"] = JSON.parse(propCfg)
     }
     console.log(JSON.stringify(deviceMetadata))
     showLoadingModal();

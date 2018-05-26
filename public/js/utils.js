@@ -271,18 +271,26 @@ datastreamWS.innerHTML = `<div class="title" style="border-bottom: 1px solid #CA
       Peek into this DataStream
     </div>
     <div class="content">
-      <ons-row>
-        <ons-col>
-          <ons-button onclick="obsDatastream();">Read Obs.</ons-button>
-          <div id="ds-obs"></div>
-        </ons-col>
-      </ons-row>
+      <ons-button onclick="obsDatastream();">Read Obs.</ons-button>
+      <div id="ds-obs"></div>
     </div>
   </ons-card>`
 
 function hideDevCfg() {
   devcfgMenu = $('#devCfg')
   let devcfgMenuToggleIcon = $("#toggle-devcfg-menu")[0]
+  devcfgMenu.slideToggle(e => {
+    if (devcfgMenu.is(":visible")) {
+      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-up")
+    } else {
+      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-down")
+    }
+  })
+}
+
+function hideCustomPropsCfg() {
+  devcfgMenu = $('#propCfg')
+  let devcfgMenuToggleIcon = $("#toggle-propcfg-menu")[0]
   devcfgMenu.slideToggle(e => {
     if (devcfgMenu.is(":visible")) {
       devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-up")
@@ -309,8 +317,15 @@ deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px sol
           </ons-toolbar-button>
         </div>
         <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%; display:none;"></textarea></p>
-        <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
-      </div>
+       <!--</div>-->
+       <div>
+         custom properties [optional]:
+         <ons-toolbar-button onclick="hideCustomPropsCfg();">
+           <ons-icon id="toggle-propcfg-menu" icon="md-chevron-down"></ons-icon>
+         </ons-toolbar-button>
+       </div>
+       <p><textarea id ="propCfg" class="textarea" rows="10" style="width:100%; display:none;"></textarea></p>
+       <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
     </div>
   </ons-card>`
 
@@ -349,6 +364,7 @@ taskDebug.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C
 function createChart(ds) {
 
     let item = document.createElement("div")
+    item.setAttribute("style", "border: 1px solid #0d0d0d;")
 
     let datastream = ds
 
@@ -364,7 +380,7 @@ function createChart(ds) {
       minValueScale: 1.1,
       responsive: true,
       grid: {
-        fillStyle:'#112334'
+        fillStyle:'#2C3A47'//'#112334'
       }}),
       canvas = item.querySelector("canvas"),
       series = new TimeSeries();
