@@ -331,7 +331,7 @@ deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px sol
 
 let graphMenu = document.createElement("div")
 graphMenu.innerHTML =
-`<ons-toolbar>
+`<ons-toolbar style="display: none;">
   <div class="left">
     <ons-toolbar-button onclick="">
       <ons-icon icon="md-plus"></ons-icon>

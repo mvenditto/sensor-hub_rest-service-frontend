@@ -162,8 +162,10 @@ function shBuildSystemGraph() {
   })
 }
 
-function collapseNode() {
-  let selectedNode = node_interactions["selected"]
+
+function collapseNode() {collapseNode_(node_interactions["selected"])}
+
+function collapseNode_(selectedNode) {
   if (selectedNode != undefined && network != undefined) {
     //network.setData(data)
     var clusterOptionsByData = {
@@ -191,7 +193,7 @@ function shInitGraphEvents(network) {
   });
 
   network.on("oncontext", function (params) {
-    console.log(node_interactions["hovered"])
+    collapseNode_(node_interactions["hovered"])
   });
 
   network.on("selectNode", function(params) {
@@ -201,6 +203,8 @@ function shInitGraphEvents(network) {
             }
         }
   });
+
+  network.on("doubleclick", (p) => console.log(p));
 
   network.on("click", function (params) {
       let node = params.nodes[0]
