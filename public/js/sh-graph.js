@@ -277,13 +277,13 @@ function clusterTasks() {
 }
 
 var options = {
-    interaction: {hover: true},
+    interaction: {hover: false},
     layout: {
-      improvedLayout: true,
+      improvedLayout: false,
       hierarchical: {
         direction: "DU",
         sortMethod: "directed",
-        //nodeSpacing: 1300,
+        nodeSpacing: 100,
         //treeSpacing: 435,
         levelSeparation: 100,
         //blockShifting: false,
@@ -375,17 +375,16 @@ var options = {
 };
 
 var options2 = {
-    interaction: {dragNodes: false},
+    interaction: {dragNodes: true, hover:true},
     layout: {
-      improvedLayout: false,
       hierarchical: {
         direction: "UD",
         sortMethod: "directed",
         nodeSpacing: 1300,
         treeSpacing: 435,
-        levelSeparation: 400,
+        levelSeparation: 500,
         blockShifting: false,
-        edgeMinimization: true,
+        edgeMinimization: false,
         parentCentralization: true
       },
     },
@@ -437,9 +436,7 @@ var options2 = {
           borderWidth: 0.5,
           font: {
             size: 200,
-            color: "black",
-            /*strokeWidth: 5,
-            strokeColor: "white"*/
+            color: "black"
           },
           color: {
               background: "#f67b0e",
@@ -552,50 +549,79 @@ function globalView() {
 
 
   var network2 = new vis.Network(container, data2, options2);
-  network2.on('zoom',function(e){
-    console.log("zoom", e);
-  });
+
+  function getContent(id) {
+    let dataz = data.nodes.get()[id].data
+    if (dataz == undefined || dataz.description.length <= 0) {
+      return "no description\navailable!"
+    } else {
+      return dataz.description
+    }
+  }
+
+  network2.on("hoverNode", function(params) {
+    let content = getContent(params.node)
+    $('#globalview').qtip({
+      content: content,
+        style: {
+          classes: 'qtip-dark'
+        },
+        show: {
+          event: event.type
+        },
+        position: {
+          my: 'top left',
+          target: 'mouse',
+          adjust: {
+            x: 10, y: 10
+          }
+        }
+      });
+    });
+
+  network2.on("blurNode", function(params) {
+    $('#globalview').qtip({
+      content: 'Node with ID: ' + params.node,
+      hide: true
+    });
+  })
 
   network2.on("selectNode", function(params) {
-    var connected = network.getConnectedNodes(params.nodes[0])
 
-    var dss = data.nodes.get({
-      filter: (n) => {
-        return connected.includes(n.id) && n.group === DATASTREAMS_GROUP
-      }
-    })
-
-    function addConnected(id) {
-      network.getConnectedEdges(id).forEach(e => {
-        var edges = data.edges.get({
-          filter: function (ee) {
-            return ee.id === e && ee.from == id;
-          }
-        });
-        edges.forEach(eee => {
-          connected.push(eee.to)
-          addConnected(eee.to)
-        })
-      })
-    }
-
-    dss.forEach(ds => {
-      addConnected(ds.id)
-    })
-
-    if (params.nodes[0] == 0) {
+    if (params.nodes[0] === 0) {
       data.nodes.get({filter: (n) => data.nodes.update({id: n.id, hidden: false})})
       return;
     }
 
-    var items = data.nodes.get({
-      filter: function (n) {
-        data.nodes.update({id: n.id, hidden: false})
-        return !connected.includes(n.id) && n.id !== params.nodes[0];
+    var connected = network.getConnectedNodes(params.nodes[0])
+
+    for (var ds in connected) {
+      var dss = connected[ds]
+      if (network.body.nodes[dss].options.group === DATASTREAMS_GROUP) {
+        var fov_prop = network.getConnectedNodes(dss)
+        fov_prop.forEach(fp => {
+          if (fp != params.nodes[0]) {
+            connected.push(fp)
+          }
+        })
       }
+    }
+
+    clusters.forEach(c =>  {
+      network.clustering.updateClusteredNode(c, {hidden: !connected.includes(c)})
     });
 
-    items.forEach(n => data.nodes.update({id: n.id, hidden: true}))
+    var items = data.nodes.get();
+    var toHide = []
+
+    items.forEach(n => {
+      var hide = false
+      if (!connected.includes(n.id) && n.id != params.nodes[0]) {
+        hide = true
+      }
+      toHide.push({id: n.id, hidden: hide})
+    })
+    data.nodes.update(toHide)
     network.focus(params.nodes[0], {animation: true, scale: 0.5})
   });
 }

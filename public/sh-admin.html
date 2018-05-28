@@ -8,6 +8,7 @@
     <!--<link rel="stylesheet" href="css/stylesheet.css">-->
     <link rel="stylesheet" href="css/json.css">
     <link rel="stylesheet" href="css/jquery.enhsplitter.css">
+    <link rel="stylesheet" href="css/jquery.qtip.min.css">
     <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/web-animations.min.js"></script>
@@ -19,6 +20,7 @@
     <script src="js/jquery.enhsplitter.js"></script>
     <script src="js/smoothie.js"></script>
     <script src="js/interact.min.js"></script>
+    <script src="js/jquery.qtip.min.js"></script>
     <script type="text/javascript" src="js/renderjson.js"></script>
     <style>
         #mynetwork {
@@ -37,6 +39,10 @@
 
         #netexplorer {
           height: 99%;
+        }
+
+        .qtip-content {
+          font-size: 1.5em;
         }
 
         .splitter_panel {
@@ -211,10 +217,10 @@
       </ons-toolbar>
       <div id="root-container">
         <div id="netexplorer"></div>
-        <ons-col>
-          <ons-row height="35%" style="height:35%;"><div id="globalview"></div></ons-row>
-          <ons-row height="65%"><div id="mynetwork"></div></ons-row>
-        </ons-col>
+        <div id="ttt">
+          <div id="globalview"></div>
+          <div id="mynetwork"></div>
+        </div>
       </div>
       <script type="text/javascript">
 
@@ -222,7 +228,8 @@
 
           renderjson.set_show_to_level(1);
           $('#root-container').enhsplitter({position: '30%'});
-          $(document).ready(r => 
+          $('#ttt').enhsplitter({position: '35%', vertical: false});
+          $(document).ready(r =>
             shBuildSystemGraph()
           )
 
