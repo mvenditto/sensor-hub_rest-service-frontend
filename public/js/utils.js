@@ -333,11 +333,11 @@ let graphMenu = document.createElement("div")
 graphMenu.innerHTML =
 `<ons-toolbar style="display: none;">
   <div class="left">
-    <ons-toolbar-button onclick="">
-      <ons-icon icon="md-plus"></ons-icon>
+    <ons-toolbar-button onclick="openClusters()">
+      <ons-icon icon="fa-expand"></ons-icon>
     </ons-toolbar-button>
-    <ons-toolbar-button onclick="collapseNode()">
-      <ons-icon icon="md-minus"></ons-icon>
+    <ons-toolbar-button onclick="clusterTasks()">
+      <ons-icon icon="fa-compress"></ons-icon>
     </ons-toolbar-button>
   </div>
 </ons-toolbar>`

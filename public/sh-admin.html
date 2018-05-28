@@ -25,6 +25,14 @@
             border: 1px solid darkgray;
             background-color: #d3d3d3;
             overflow: hidden;
+            width: 100%;
+        }
+
+        #globalview {
+            border: 1px solid darkgray;
+            background-color: #d3d3d3;
+            overflow: hidden;
+            width: 100%;
         }
 
         #netexplorer {
@@ -203,7 +211,10 @@
       </ons-toolbar>
       <div id="root-container">
         <div id="netexplorer"></div>
-        <div id="mynetwork"></div>
+        <ons-col>
+          <ons-row height="35%" style="height:35%;"><div id="globalview"></div></ons-row>
+          <ons-row height="65%"><div id="mynetwork"></div></ons-row>
+        </ons-col>
       </div>
       <script type="text/javascript">
 
@@ -211,7 +222,9 @@
 
           renderjson.set_show_to_level(1);
           $('#root-container').enhsplitter({position: '30%'});
-          $(document).ready(r => shBuildSystemGraph())
+          $(document).ready(r => 
+            shBuildSystemGraph()
+          )
 
           this.onShow = function() {   console.log("onShow") };
           this.onHide = function() {   console.log("onHide") };

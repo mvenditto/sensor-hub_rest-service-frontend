@@ -22,7 +22,9 @@ let TASKS_GROUP = 'tasks'
 let FOVS_GROUP = 'features_of_interest'
 
 var data = {}
+var data2 = {}
 var network = undefined
+var clusters = []
 
 function shGet(resourceName) {return $.get(SH_REST_SERVER + resourceName) }
 
@@ -121,7 +123,7 @@ function shBuildSystemGraph() {
       if (devTasks != undefined) {
         devTasks.supportedTasks.forEach(t => {
           t.deviceId = dev.id
-          nodes.add({id: ids, label:t.title, group:TASKS_GROUP, data:t, level:5, widthConstraint: {maximum: 100}})
+          nodes.add({id: ids, label:t.title, group:TASKS_GROUP, data:t, level:5, widthConstraint: {maximum: 200}})
           edges.add({from:devId, to:ids})
           ids = ids + 1
         })
@@ -129,29 +131,34 @@ function shBuildSystemGraph() {
     })
 
     properties.forEach(prop => {
-      nodes.add({id:ids, label:prop.name, group:PROPERTIES_GROUP, level:6, data:prop})
+      nodes.add({id:ids, label:prop.name, group:PROPERTIES_GROUP, level:7, data:prop})//6
       ids = ids + 1
     })
 
     features.forEach(fov => {
-      nodes.add({id:ids, label:fov.name, group:FOVS_GROUP, level:6, data:fov})
+      nodes.add({id:ids, label:fov.name, group:FOVS_GROUP, level:8, data:fov})//6
       ids = ids + 1
     })
 
     dataStreams.forEach(ds => {
-      nodes.add({id:ids, label:ds.name, group:DATASTREAMS_GROUP, data:ds, level:5})
+      nodes.add({id:ids, label:ds.name, group:DATASTREAMS_GROUP, data:ds, level:6})//5
       edges.add({from:findDeviceId(ds.sensor.id), to: ids})
       let propId = findPropId(ds.observedProperty.definition)
       edges.add({from:ids, to:propId})
-      edges.add({from:propId, to:findFeatureId(ds.featureOfInterest.name)})
+      edges.add({from:ids, to:findFeatureId(ds.featureOfInterest.name)})
       ids = ids + 1
     })
 
     var container = document.getElementById('mynetwork');
+    nodes = Array.from(nodes)
     data = {
-        nodes: Array.from(nodes),
-        edges: Array.from(edges)
+        nodes: new vis.DataSet(nodes),
+        edges: new vis.DataSet(Array.from(edges))
     };
+    data2 = {
+        nodes: nodes.slice(),
+        edges: data.edges
+    }
     network = new vis.Network(container, data, options);
     shInitGraphEvents(network);
     $("#mynetwork canvas").bind("contextmenu", (e) => false);
@@ -159,29 +166,25 @@ function shBuildSystemGraph() {
     $("#mynetwork").prepend(graphMenu)
     hideLoadingModal()
     $(".splitter_panel").css({"overflow": "hidden"})
+    clusterTasks()
+    globalView()
   })
 }
 
+function isChild(parent, child) {
+  var r = false
+  data.edges.forEach(e => {
+    if (e.from === parent.id && e.to === child.id) {
+      r = true
+    }
+  })
+  return r
+}
 
-function collapseNode() {collapseNode_(node_interactions["selected"])}
 
-function collapseNode_(selectedNode) {
-  if (selectedNode != undefined && network != undefined) {
-    //network.setData(data)
-    var clusterOptionsByData = {
-      joinCondition:function(parentOpts, childOpts) {
-        console.log(childOpts.group, childOpts.id)
-        let cond = childOpts.group === DATASTREAMS_GROUP|| childOpts.group === TASKS_GROUP || childOpts.group === PROPERTIES_GROUP
-        return cond;
-      },
-      clusterNodeProperties: {
-        label:selectedNode.label + "\n[collapsed]",
-        group: COLLAPSED_DEVICE,
-        level: selectedNode.level
-      }
-    };
-    network.clusterByConnection(selectedNode.id, clusterOptionsByData)
-  }
+
+function openClusters() {
+  clusters.forEach(n => network.openCluster(n))
 }
 
 function shInitGraphEvents(network) {
@@ -193,7 +196,6 @@ function shInitGraphEvents(network) {
   });
 
   network.on("oncontext", function (params) {
-    collapseNode_(node_interactions["hovered"])
   });
 
   network.on("selectNode", function(params) {
@@ -247,17 +249,51 @@ function shInitGraphEvents(network) {
 
       }
   });
+}
 
+function clusterTasks() {
+      clusters = []
+      var devs = data.nodes.get({
+        filter: function(n) {
+          return n.group === DEVICES_GROUP
+        }
+      })
+
+      devs.forEach(dev => {
+        var neighbors = network.getConnectedNodes(dev.id)
+        var clusterOptionsByData = {
+            joinCondition: function(childOptions) {
+                return childOptions.group === TASKS_GROUP && neighbors.includes(childOptions.id);
+            },
+            processProperties: function (clusterOptions, childNodes, childEdges) {
+              clusterOptions.label = "tasks("+childNodes.length+")[+]"
+              clusters.push(clusterOptions.id)
+              return clusterOptions
+            },
+            clusterNodeProperties: {label: "tasks[+]", id:'tasks-cluster_' +  dev.id, group: TASKS_GROUP, level: 5}
+        };
+        network.cluster(clusterOptionsByData);
+      })
 }
 
 var options = {
     interaction: {hover: true},
     layout: {
+      improvedLayout: true,
       hierarchical: {
-        //sortMethod: "directed"
-        direction: "DU"
+        direction: "DU",
+        sortMethod: "directed",
+        //nodeSpacing: 1300,
+        //treeSpacing: 435,
+        levelSeparation: 100,
+        //blockShifting: false,
+        //edgeMinimization: true,
+        //parentCentralization: true
       },
       randomSeed: 8
+    },
+    physics: {
+      enabled: false
     },
     nodes: {
         shape: 'dot',
@@ -286,14 +322,6 @@ var options = {
           shape: 'image',
           image : 'imgs/sensor.png',
           size: 30
-            /*
-            shape: 'icon',
-            icon: {
-                face: 'FontAwesome',
-                code: '\uf2db',
-                size: 50,
-                color: '#FB9537'
-            }*/
         },
         collapsed_sensors: {
             shape: 'image',
@@ -304,26 +332,11 @@ var options = {
           shape: 'image',
           image : 'imgs/gearwheels-couple.svg',
           size: 30
-            /*
-            shape: 'icon',
-            icon: {
-                face: 'FontAwesome',
-                code: '\uf085',
-                size: 50,
-                color: '#707070'
-            }*/
         },
         datastreams: {
           shape: 'image',
           image : 'imgs/pulse.svg',
           size: 35
-          /*shape: 'icon',
-            icon: {
-                face: 'Ionicons',
-                code: '\uf492',
-                size: 50,
-                color: '#484749'
-            }*/
         },
         tasks: {
             shape: 'image',
@@ -337,14 +350,6 @@ var options = {
           shape: 'image',
           image : 'imgs/hub.png',
           size: 27
-            /*
-            shape: 'icon',
-            icon: {
-                face: 'FontAwesome',
-                code: '\uf288',
-                size: 50,
-                color: '#BF1A2F'
-            }*/
         },
         features_of_interest: {
           shape: 'image',
@@ -355,41 +360,245 @@ var options = {
           shape: 'image',
           image : 'imgs/server.svg',
           size: 20
-            /*shape: 'icon',
-            icon: {
-                face: 'FontAwesome',
-                code: '\uf233',
-                size: 50,
-                color: '#4286f4'
-            }*/
         },
         things: {
           shape: 'image',
           image : 'imgs/wireless-internet.png',
           size: 30
-            /*shape: 'icon',
-            icon: {
-                face: 'Ionicons',
-                code: '\uf2ac',
-                size: 50,
-                color: '#138A36'
-            }*/
         },
         services: {
         shape: 'image',
         image : 'imgs/puzzle-piece.svg',
         size: 25
-          /*
-            shape: 'icon',
-            icon: {
-                face: 'FontAwesome',
-                code: '\uf1b2',
-                size: 50,
-                color: '#9E788F'
-            }*/
         }
     }
 };
+
+var options2 = {
+    interaction: {dragNodes: false},
+    layout: {
+      improvedLayout: false,
+      hierarchical: {
+        direction: "UD",
+        sortMethod: "directed",
+        nodeSpacing: 1300,
+        treeSpacing: 435,
+        levelSeparation: 400,
+        blockShifting: false,
+        edgeMinimization: true,
+        parentCentralization: true
+      },
+    },
+    physics: {
+      enabled: false
+    },
+    nodes: {
+        shape: 'box',
+        chosen: {
+          node: function(values, id, selected, hovering) {
+                  if(selected === true) {
+                    values.borderColor = "yellow"
+                    values.borderWidth = 1.0
+                    values.color = "#F8EFBA"
+                    values.shadowSize = 70
+                    values.shadowColor = "yellow"
+                    values.shadowX = -1
+                    values.shadowY = -1
+                  }
+                },
+          label: function(values, id, selected, hovering) {
+                  if(selected === true) {
+                    values.color = "#2C3A47"
+                    values.mod = "bold"
+                    values.size = 300
+                  }
+                }
+        }
+    },
+    edges: {
+        width: 20,
+        smooth: false,
+        color: {
+          highlight: "#4286f4",
+          hover: "#6891d8",
+          color: "#8c9199",
+        },
+        arrows: {
+          to: {
+            enabled: true,
+            scaleFactor: 5.0
+          }
+        }
+    },
+    groups: {
+        sensors: {
+          size: 200,
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 200,
+            color: "black",
+            /*strokeWidth: 5,
+            strokeColor: "white"*/
+          },
+          color: {
+              background: "#f67b0e",
+              border: "black"
+          }
+        },
+        drivers: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 150,
+            color: "black",
+            strokeWidth: 5,
+            strokeColor: "white"
+          },
+          color: {
+              background: "lightgray",
+              border: "black"
+          }
+        },
+        datastreams: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 170,
+            color: "white",
+          },
+          color: {
+              background: "#485460",
+              border: "black"
+          }
+        },
+        tasks: {
+          shape: "box",
+          color: "gray",
+          hidden: true
+        },
+        properties: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 160,
+            color: "black"
+          },
+          color: {
+              background: "#FD7272",
+              border: "black"
+          }
+        },
+        features_of_interest: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 160,
+            color: "white"
+          },
+          color: {
+              background: "#98214f",
+              border: "black"
+          }
+        },
+        hubs: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 160,
+            color: "white",
+            strokeWidth: 5,
+            strokeColor: "black"
+          },
+          color: {
+              background: "#3c40c6",
+              border: "black"
+          }
+        },
+        things: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 150,
+            color: "black",
+            strokeWidth: 5,
+            strokeColor: "white"
+          },
+          color: {
+              background: "#0be881",
+              border: "black"
+          }
+        },
+        services: {
+          margin: { top: 35, right: 35, bottom: 35, left: 35 },
+          borderWidth: 0.5,
+          font: {
+            size: 150,
+            color: "black",
+            strokeWidth: 5,
+            strokeColor: "white"
+          },
+          color: {
+              background: "#D6A2E8",
+              border: "black"
+          }
+        }
+    }
+};
+
+function globalView() {
+
+  var container = document.getElementById('globalview');
+
+
+  var network2 = new vis.Network(container, data2, options2);
+  network2.on('zoom',function(e){
+    console.log("zoom", e);
+  });
+
+  network2.on("selectNode", function(params) {
+    var connected = network.getConnectedNodes(params.nodes[0])
+
+    var dss = data.nodes.get({
+      filter: (n) => {
+        return connected.includes(n.id) && n.group === DATASTREAMS_GROUP
+      }
+    })
+
+    function addConnected(id) {
+      network.getConnectedEdges(id).forEach(e => {
+        var edges = data.edges.get({
+          filter: function (ee) {
+            return ee.id === e && ee.from == id;
+          }
+        });
+        edges.forEach(eee => {
+          connected.push(eee.to)
+          addConnected(eee.to)
+        })
+      })
+    }
+
+    dss.forEach(ds => {
+      addConnected(ds.id)
+    })
+
+    if (params.nodes[0] == 0) {
+      data.nodes.get({filter: (n) => data.nodes.update({id: n.id, hidden: false})})
+      return;
+    }
+
+    var items = data.nodes.get({
+      filter: function (n) {
+        data.nodes.update({id: n.id, hidden: false})
+        return !connected.includes(n.id) && n.id !== params.nodes[0];
+      }
+    });
+
+    items.forEach(n => data.nodes.update({id: n.id, hidden: true}))
+    network.focus(params.nodes[0], {animation: true, scale: 0.5})
+  });
+}
 
 function deleteDevice() {
     let selectedNode = node_interactions["selected"]
