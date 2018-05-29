@@ -134,7 +134,7 @@ function jsonToOnsCard(j, title="") {
       if (cardTitle == "Device") {
         let deleteBtn = document.createElement("div")
 
-        deleteBtn.innerHTML = `<p style="margin-top: 30px;"><ons-button onclick="showTemplateDialog();">Delete</ons-button></p>`
+        deleteBtn.innerHTML = `<p style="margin-top: 30px;"><ons-button onclick="showTemplateDialog('my-dialog','dialog.html');">Delete</ons-button></p>`
         content.appendChild(deleteBtn)
       }
   });
@@ -247,6 +247,76 @@ function createItem(ds) {
 
 }
 
+function dsSelect() {
+
+  let ds = data.nodes.get({filter: (d) => {
+    return d.group === DRIVERS_GROUP && d.id === node_interactions["selected"].id
+  }});
+
+  console.log(ds)
+  let meta = ds[0].data.datastreamsMetadata
+
+  let select = $("#cp_dss select")
+  select.empty()
+
+  for(var d in meta) {
+    select.append("<option>"+ d +"</option>")
+  }
+
+}
+
+function showPropsDialog() {
+  dsSelect()
+  showTemplateDialog('my-dialog2','dialog2.html')
+}
+
+function customProps() {
+  let name = $("#cp_name")
+  let desc = $("#cp_desc")
+  let fov_name = $("#cp_fov_name")
+  let fov_desc = $("#cp_fov_desc")
+  let fov_enc = $("#cp_fov_enc")
+  let fov_feat = $("#cp_fov_feat")
+
+  var props = { }
+  var feat = { }
+
+  function setIfNonEmpty(input, field) {
+    let disabled = input.is(":disabled")
+    let value = input.val()
+    if(!disabled && value.length > 0) feat[field] = value
+    disabled
+  }
+
+  if (!name.is(":disabled") && name.val.length > 0) props.name = name.val()
+  if (!desc.is(":disabled") && desc.val.length > 0) props.description = desc.val()
+
+  setIfNonEmpty(fov_name, "name")
+  setIfNonEmpty(fov_desc, "description")
+  setIfNonEmpty(fov_enc, "encoding")
+  setIfNonEmpty(fov_feat, "feature")
+
+  if(Object.keys(feat).length === 4) props.featureOfInterest = feat
+
+  return JSON.stringify(props)
+}
+
+function setCustomProps() {
+  let dialog = document.getElementById("my-dialog2")
+  dialog.dataset[$("#cp_dss").val()] = customProps()
+}
+
+function clearCustomProps() {
+  let dialog = document.getElementById("my-dialog2")
+  for(var k in dialog.dataset) {
+    delete dialog.dataset[k]
+  }
+}
+
+function toggleEnabled(id) {
+  $("#"+id).prop('disabled', function(i, v) { return !v; })
+}
+
 function toggleGraphMenu(){
     let graphMenu = $("#mynetwork ons-toolbar")
     let graphMenuToggleIcon = $("#toggle-graph-menu")[0]
@@ -288,18 +358,6 @@ function hideDevCfg() {
   })
 }
 
-function hideCustomPropsCfg() {
-  devcfgMenu = $('#propCfg')
-  let devcfgMenuToggleIcon = $("#toggle-propcfg-menu")[0]
-  devcfgMenu.slideToggle(e => {
-    if (devcfgMenu.is(":visible")) {
-      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-up")
-    } else {
-      devcfgMenuToggleIcon.setAttribute("icon", "md-chevron-down")
-    }
-  })
-}
-
 let deviceCreationForm = document.createElement("ons-card")
 deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px solid #CAD3C8;">
       Create a device with this Driver
@@ -310,22 +368,15 @@ deviceCreationForm.innerHTML = `<div class="title" style="border-bottom: 1px sol
         <p><ons-input id="devDesc" modifier="underbar" placeholder="Brief description" float></ons-input></p>
         <p><ons-input id="devMetadataEncoding" modifier="underbar" placeholder="application/pdf" float></ons-input></p>
         <p><ons-input id="devMetadataURI" modifier="underbar" placeholder="http://example.org/schema.pdf" float></ons-input></p>
-        <div>
-          configuration [optional]:
-          <ons-toolbar-button onclick="hideDevCfg();">
-            <ons-icon id="toggle-devcfg-menu" icon="md-chevron-down"></ons-icon>
-          </ons-toolbar-button>
-        </div>
-        <p><textarea id ="devCfg" class="textarea" rows="10" style="width:100%; display:none;"></textarea></p>
-       <!--</div>-->
        <div>
-         custom properties [optional]:
-         <ons-toolbar-button onclick="hideCustomPropsCfg();">
-           <ons-icon id="toggle-propcfg-menu" icon="md-chevron-down"></ons-icon>
+         <ons-toolbar-button onclick="">
+           <ons-icon icon="fa-sliders" onclick="showCfgDialog()"></ons-icon>
+         </ons-toolbar-button>
+         <ons-toolbar-button onclick="showPropsDialog();">
+           <ons-icon icon="fa-edit"></ons-icon>
          </ons-toolbar-button>
        </div>
-       <p><textarea id ="propCfg" class="textarea" rows="10" style="width:100%; display:none;"></textarea></p>
-       <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();">Create</ons-button></p>
+       <p style="margin-top: 30px;"><ons-button onclick="createDeviceFromDriver();clearCustomProps();">Create</ons-button></p>
     </div>
   </ons-card>`
 

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/json.css">
     <link rel="stylesheet" href="css/jquery.enhsplitter.css">
     <link rel="stylesheet" href="css/jquery.qtip.min.css">
+    <link rel="stylesheet" href="css/jsoneditor.min.css">
     <script src="https://unpkg.com/onsenui/js/onsenui.min.js"></script>
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/web-animations.min.js"></script>
@@ -21,6 +22,7 @@
     <script src="js/smoothie.js"></script>
     <script src="js/interact.min.js"></script>
     <script src="js/jquery.qtip.min.js"></script>
+    <script src="js/jsoneditor.min.js"></script>
     <script type="text/javascript" src="js/renderjson.js"></script>
     <style>
         #mynetwork {
@@ -39,6 +41,27 @@
 
         #netexplorer {
           height: 99%;
+        }
+
+        #my-dialog2 .dialog {
+          width: 420px;
+        }
+
+        #cfg-dialog .dialog, .dialog-container{
+          width: 400px;
+        }
+
+        #cfg-dialog .container {
+          width: 400px;
+        }
+
+
+        div.jsoneditor {
+          border: 1px solid black;
+        }
+        div.jsoneditor-menu {
+          background-color: #2c3a47;
+          border-bottom: 1px solid gray;
         }
 
         .qtip-content {
@@ -123,10 +146,12 @@
         }
 
         ons-select {
-          padding-right: 20px;
-          padding-left: 20px;
-          padding-top: 4px;
-          border: 1px solid #bcbcbc;
+          width:100%;
+          border: 1px solid gray;
+        }
+
+        select.select-input {
+          padding-left: 5%;
         }
 
         canvas {
@@ -262,4 +287,96 @@
       </p>
     </div>
   </ons-modal>
+
+  <template id="cfg-dialog.html">
+    <ons-dialog id="cfg-dialog">
+      <div class="container" style="text-align: center; padding: 10px;">
+          <p>Configuration (json)</p>
+          <div id ="devCfg" style="width:380px; height: 250px;"></div>
+      </div>
+      <div style="text-align: center; padding: 10px;">
+        <p><ons-button onclick="hideDialog('cfg-dialog')">Close</ons-button></p>
+      </div>
+    </ons-dialog>
+  </template>
+
+  <template id="dialog2.html">
+    <ons-dialog id="my-dialog2">
+      <div style="text-align: center; padding: 10px;">
+        <p>
+          Set Custom Properties.
+        </p>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">
+            <label class="left">
+              DataStream
+              <ons-toolbar-button onclick="dsSelect();">
+                <ons-icon icon="fa-refresh"></ons-icon>
+              </ons-toolbar-button>
+            </label>
+          </ons-col>
+          <ons-col>
+            <ons-select id="cp_dss"></ons-select>
+          </ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">
+            <label class="left">
+            <ons-checkbox input-id="check-1" onchange="toggleEnabled('cp_name')"></ons-checkbox>
+            </label>
+            <label for="check-1" class="center"> Name </label>
+          </ons-col>
+          <ons-col>
+            <textarea id ="cp_name" class="textarea" rows="1" style="width:100%;" disabled></textarea>
+          </ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">
+            <label class="left">
+            <ons-checkbox input-id="check-2" onchange="toggleEnabled('cp_desc')"></ons-checkbox>
+            </label>
+            <label for="check-2" class="center"> Description </label>
+          </ons-col>
+          <ons-col>
+            <textarea id ="cp_desc" class="textarea" rows="1" style="width:100%;" disabled></textarea>
+          </ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 8px;margin-top:8px;">
+          <ons-col style="text-align: left;">
+            <label class="left">
+            <ons-checkbox input-id="check-3"
+            onchange="toggleEnabled('cp_fov_name');toggleEnabled('cp_fov_desc');toggleEnabled('cp_fov_enc');toggleEnabled('cp_fov_feat')"></ons-checkbox>
+            </label>
+            <label for="check-3" class="center"> Feature of Interest </label>
+          </ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">Name</ons-col>
+          <ons-col><textarea id ="cp_fov_name" class="textarea" rows="1" style="width:100%;" disabled></textarea></ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">Description</ons-col>
+          <ons-col><textarea id ="cp_fov_desc" class="textarea" rows="1" style="width:100%;" disabled></textarea></ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">Encoding</ons-col>
+          <ons-col><textarea id ="cp_fov_enc" class="textarea" rows="1" style="width:100%;" disabled></textarea></ons-col>
+        </ons-row>
+
+        <ons-row style="margin-bottom: 4px;">
+          <ons-col style="text-align: left;">Feature (json)</ons-col>
+          <ons-col><textarea id ="cp_fov_feat" class="textarea" rows="5" style="width:100%;" disabled></textarea></ons-col>
+        </ons-row>
+
+        <p><ons-button onclick="hideDialog('my-dialog2', setCustomProps)">Close</ons-button></p>
+      </div>
+    </ons-dialog>
+  </template>
 </html>

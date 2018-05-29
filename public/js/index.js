@@ -18,23 +18,38 @@ window.fn.loadPage = function(page) {
   menu.close()
 }
 
-var showTemplateDialog = function() {
-  var dialog = document.getElementById('my-dialog');
+var showCfgDialog = function() {
+  var dialog = document.getElementById("cfg-dialog")
+  if(dialog) {
+    dialog.show()
+  } else {
+    ons.createElement("cfg-dialog.html", { append: true }).then(function(diag) {
+      var container = document.getElementById("devCfg");
+      var options = {mode:"code"};
+      var editor = new JSONEditor(container, options);
+      editor.set({})
+      diag.show()
+    });
+  }
+}
+
+var showTemplateDialog = function(id, template) {
+  var dialog = document.getElementById(id);
 
   if (dialog) {
-    dialog.show();
+    dialog.show()
   } else {
-    ons.createElement('dialog.html', { append: true })
-      .then(function(dialog) {
-        dialog.show();
-      });
+    ons.createElement(template, { append: true }).then(function(diag) {
+        diag.show()
+    });
   }
 };
 
-var hideDialog = function(id) {
+var hideDialog = function(id, cb) {
   document
     .getElementById(id)
     .hide();
+  cb();
 };
 
 function showModal() {
