@@ -375,7 +375,7 @@ var options = {
 };
 
 var options2 = {
-    interaction: {dragNodes: true, hover:true},
+    interaction: {dragNodes: false, hover:true},
     layout: {
       hierarchical: {
         direction: "UD",
