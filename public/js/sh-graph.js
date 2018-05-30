@@ -656,12 +656,19 @@ function createDeviceFromDriver() {
         driverName: selectedNode.data.name,
     }
     let devCfg = $("#devCfg").val()
-    if (devCfg.length > 0) {
+    if (devCfg !== undefined && devCfg.length > 0) {
       deviceMetadata["cfgString"] = devCfg
     }
-    let propCfg = $("#propCfg").val()
-    if (propCfg.length > 0) {
-      deviceMetadata["dsProps"] = JSON.parse(propCfg)
+    let propCfg = $("#my-dialog2")[0].dataset
+    if (propCfg !== undefined) {
+      var props = {}
+      for(var k in propCfg) {
+        if (k.startsWith("cp_")) {
+          props[k.split("_")[1]] = JSON.parse(propCfg[k])
+        }
+      }
+      console.log(props)
+      deviceMetadata["dsProps"] = props
     }
     console.log(JSON.stringify(deviceMetadata))
     showLoadingModal();

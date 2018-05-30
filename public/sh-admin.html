@@ -51,10 +51,6 @@
           width: 400px;
         }
 
-        #cfg-dialog .container {
-          width: 400px;
-        }
-
 
         div.jsoneditor {
           border: 1px solid black;
@@ -292,7 +288,8 @@
     <ons-dialog id="cfg-dialog">
       <div class="container" style="text-align: center; padding: 10px;">
           <p>Configuration (json)</p>
-          <div id ="devCfg" style="width:380px; height: 250px;"></div>
+          <!--<div id ="devCfg" style="width:380px; height: 250px;"></div>-->
+          <textarea id ="devCfg" class="textarea" rows="15" style="width:100%;" ></textarea>
       </div>
       <div style="text-align: center; padding: 10px;">
         <p><ons-button onclick="hideDialog('cfg-dialog')">Close</ons-button></p>

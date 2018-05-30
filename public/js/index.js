@@ -18,16 +18,33 @@ window.fn.loadPage = function(page) {
   menu.close()
 }
 
+function enableTab(id) {
+  var el = document.getElementById(id);
+  el.onkeydown = function(e) {
+    if (e.keyCode === 9) { // tab was pressed
+
+      // get caret position/selection
+      var val = this.value,
+      start = this.selectionStart,
+      end = this.selectionEnd;
+
+      // set textarea value to: text before caret + tab + text after caret
+      this.value = val.substring(0, start) + '\t' + val.substring(end);
+    }
+  }
+}
+
 var showCfgDialog = function() {
   var dialog = document.getElementById("cfg-dialog")
   if(dialog) {
     dialog.show()
   } else {
     ons.createElement("cfg-dialog.html", { append: true }).then(function(diag) {
-      var container = document.getElementById("devCfg");
+      /*var container = document.getElementById("devCfg");
       var options = {mode:"code"};
       var editor = new JSONEditor(container, options);
-      editor.set({})
+      editor.set({})*/
+      enableTab("devCfg")
       diag.show()
     });
   }
@@ -49,7 +66,7 @@ var hideDialog = function(id, cb) {
   document
     .getElementById(id)
     .hide();
-  cb();
+  if (cb !== undefined) cb();
 };
 
 function showModal() {

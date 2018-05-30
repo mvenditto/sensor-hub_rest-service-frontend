@@ -303,7 +303,7 @@ function customProps() {
 
 function setCustomProps() {
   let dialog = document.getElementById("my-dialog2")
-  dialog.dataset[$("#cp_dss").val()] = customProps()
+  dialog.dataset["cp_" + $("#cp_dss").val()] = customProps()
 }
 
 function clearCustomProps() {
