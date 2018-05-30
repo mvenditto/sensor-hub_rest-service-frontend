@@ -210,7 +210,7 @@ function shInitGraphEvents(network) {
 
   network.on("click", function (params) {
       let node = params.nodes[0]
-      if (node != undefined) {
+      if (node != undefined && !network.isCluster(node)) {
         node_interactions["selected"] = nodes._data[node];
         let c = document.getElementById("netexplorer")
         while (c.firstChild) {
