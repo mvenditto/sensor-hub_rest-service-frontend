@@ -293,7 +293,7 @@ var options = {
       randomSeed: 8
     },
     physics: {
-      enabled: false
+      enabled: true
     },
     nodes: {
         shape: 'dot',
