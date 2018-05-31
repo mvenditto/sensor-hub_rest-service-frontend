@@ -552,11 +552,19 @@ function globalView() {
 
   function getContent(id) {
     let dataz = data.nodes.get()[id].data
-    if (dataz == undefined || dataz.description.length <= 0) {
-      return "no description\navailable!"
-    } else {
-      return dataz.description
+    var desc = "no description available!"
+    if (dataz !== undefined && dataz.description.length > 0) {
+      desc = dataz.description
     }
+    let img = options.groups[data.nodes.get()[id].group].image
+    return `<ons-row style="min-width: 200px">
+      <ons-col class="qtip-img" width="38px">
+        <img class="centered" src="${img}" width="32px" height="32px">
+      </ons-col>
+      <ons-col height="100%" style="vertical-align: middle;">
+        <div class="qtip-desc">${desc}</div>
+      </ons-col>
+    </ons-row>`
   }
 
   network2.on("hoverNode", function(params) {
@@ -564,7 +572,7 @@ function globalView() {
     $('#globalview').qtip({
       content: content,
         style: {
-          classes: 'qtip-dark'
+          classes: 'qtip-sh'
         },
         show: {
           event: event.type
@@ -659,12 +667,13 @@ function createDeviceFromDriver() {
     if (devCfg !== undefined && devCfg.length > 0) {
       deviceMetadata["cfgString"] = devCfg
     }
-    let propCfg = $("#my-dialog2")[0].dataset
+    let propCfg = $("#my-dialog2")[0]
     if (propCfg !== undefined) {
+      var propCfgDataset = propCfg.dataset
       var props = {}
-      for(var k in propCfg) {
+      for(var k in propCfgDataset) {
         if (k.startsWith("cp_")) {
-          props[k.split("_")[1]] = JSON.parse(propCfg[k])
+          props[k.split("_")[1]] = JSON.parse(propCfgDataset[k])
         }
       }
       console.log(props)

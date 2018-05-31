@@ -308,9 +308,20 @@ function setCustomProps() {
 
 function clearCustomProps() {
   let dialog = document.getElementById("my-dialog2")
-  for(var k in dialog.dataset) {
-    delete dialog.dataset[k]
+  if (dialog.dataset !== undefined) {
+    for(var k in dialog.dataset) {
+      delete dialog.dataset[k]
+    }
   }
+  $("#cp_name").prop("disabled", true)
+  $("#cp_desc").prop("disabled", true)
+  $("#cp_fov_name").prop("disabled", true)
+  $("#cp_fov_desc").prop("disabled", true)
+  $("#cp_fov_enc").prop("disabled", true)
+  $("#cp_fov_feat").prop("disabled", true)
+  $("#check-1").prop("checked", false)
+  $("#check-2").prop("checked", false)
+  $("#check-3").prop("checked", false)
 }
 
 function toggleEnabled(id) {
